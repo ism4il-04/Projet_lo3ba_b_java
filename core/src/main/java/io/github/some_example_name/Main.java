@@ -23,8 +23,10 @@ public class Main implements ApplicationListener {
     Texture shotTexture;
     SpriteBatch spriteBatch;
     FitViewport viewport;
-    Sprite jetSprite;
-    Array<Sprite> shotSprites;
+    Jet jet;
+    Array<Bullet> bullets;
+    float bulletCooldown = 0.2f; // Time between shots (in seconds)
+    float timeSinceLastShot = 0f;
     @Override
     public void create() {
         backgroundTexture = new Texture("back.png");
@@ -33,11 +35,8 @@ public class Main implements ApplicationListener {
         shotTexture = new Texture("shot_1.png");
         spriteBatch = new SpriteBatch();
         viewport = new FitViewport(8,5);
+        jet = new Jet(jetTexture);
 
-        jetSprite = new Sprite(jetTexture);
-        jetSprite.setSize(1,1);
-        shotSprites = new Array<>();
-        createShot();
     }
 
     @Override
@@ -47,38 +46,24 @@ public class Main implements ApplicationListener {
 
     @Override
     public void render() {
+
         input();
         logic();
         draw();
     }
 
     public void input() {
-        float speed = 2f;
         float delta = Gdx.graphics.getDeltaTime();
-
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
-            jetSprite.translateX(speed * delta);
-        } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT)){
-            jetSprite.translateX(-speed * delta);
-        } else if (Gdx.input.isKeyPressed(Input.Keys.UP)){
-            jetSprite.translateY(speed * delta);
-        } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)){
-            jetSprite.translateY(-speed * delta);
-        }
+        jet.update(delta);
     }
     public void logic(){
         float worldWidth = viewport.getWorldWidth();
         float worldHeight = viewport.getWorldHeight();
-        float jetWidth = jetSprite.getWidth();
-        float jetHeight = jetSprite.getHeight();
-
-        jetSprite.setX(MathUtils.clamp(jetSprite.getX(),0,worldWidth-jetWidth));
-        jetSprite.setY(MathUtils.clamp(jetSprite.getY(),0,worldHeight-jetHeight));
-
+        jet.clampPosition(worldWidth, worldHeight);
         float delta = Gdx.graphics.getDeltaTime();
-
-        for (Sprite shotSprite : shotSprites) {
-            shotSprite.translateY(2f*delta);
+        // Update all bullets
+        for (Bullet bullet : jet.getBullets()) {
+            bullet.update(delta); // Move bullets
         }
     }
     public void draw(){
@@ -90,25 +75,10 @@ public class Main implements ApplicationListener {
         float worldwidth = viewport.getWorldWidth();
         float worldheight = viewport.getWorldHeight();
         spriteBatch.draw(backgroundTexture, 0, 0, worldwidth, worldheight);
-        jetSprite.draw(spriteBatch);
-        for (Sprite shotSprite : shotSprites) {
-            shotSprite.draw(spriteBatch);
-        }
+        jet.draw(spriteBatch);
         spriteBatch.end();
     }
 
-    private void createShot(){
-        float shotWidth = .1f;
-        float shotHeight = .1f;
-        float worldWidth = viewport.getWorldWidth();
-        float worldHeight = viewport.getWorldHeight();
-
-        Sprite shotSprite = new Sprite(shotTexture);
-        shotSprite.setSize(shotWidth, shotHeight);
-        shotSprite.setX(MathUtils.random(0f,worldWidth-shotWidth));
-        shotSprite.setY(worldHeight);
-        shotSprites.add(shotSprite);
-    }
 
     @Override
     public void pause() {
@@ -122,5 +92,10 @@ public class Main implements ApplicationListener {
 
     @Override
     public void dispose() {
+        backgroundTexture.dispose();
+        jetTexture.dispose();
+        enemyJet.dispose();
+        shotTexture.dispose();
+        spriteBatch.dispose();
     }
 }
