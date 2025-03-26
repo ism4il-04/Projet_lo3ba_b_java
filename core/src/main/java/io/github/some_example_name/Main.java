@@ -55,7 +55,9 @@ public class Main implements ApplicationListener {
     public void input() {
         float speed = 2f;
         float delta = Gdx.graphics.getDeltaTime();
+        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
 
+        }
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
             jetSprite.translateX(speed * delta);
         } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT)){
