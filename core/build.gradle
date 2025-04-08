@@ -2,9 +2,19 @@
 eclipse.project.name = appName + '-core'
 
 dependencies {
-  api "com.badlogicgames.gdx:gdx:$gdxVersion"
-  api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
-  if(enableGraalNative == 'true') {
-    implementation "io.github.berstanio:gdx-svmhelper-annotations:$graalHelperVersion"
-  }
+  implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
+  implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
+  implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+  implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
 }
+jar {
+  manifest {
+    attributes 'Main-Class': 'io.github.lo3ba.Main'
+  }
+  from {
+    configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+  }
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+sourceSets.main.resources.srcDirs = [ "../assets" ]
+
