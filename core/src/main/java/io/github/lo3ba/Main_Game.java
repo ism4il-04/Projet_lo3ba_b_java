@@ -9,7 +9,7 @@ import io.github.lo3ba.screens.GameScreen;
 
 import java.io.IOException;
 
-public class Main extends Game {
+public class Main_Game extends Game {
     private SpriteBatch batch;
     private ChatClient chatClient;
     private ChatServer chatServer;
