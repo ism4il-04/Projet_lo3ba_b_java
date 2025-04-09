@@ -50,7 +50,7 @@ public class GameOver extends JDialog {
     }
 
     public static void main(String[] args) {
-        alae dialog = new GameOver();
+        GameOver dialog = new GameOver();
         dialog.pack();
         dialog.setVisible(true);
         System.exit(0);
