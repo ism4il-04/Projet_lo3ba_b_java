@@ -1,12 +1,12 @@
 import javax.swing.*;
 import java.awt.event.*;
 
-public class alae extends JDialog {
+public class GameOver extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
 
-    public alae() {
+    public GameOver() {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
@@ -50,7 +50,7 @@ public class alae extends JDialog {
     }
 
     public static void main(String[] args) {
-        alae dialog = new alae();
+        alae dialog = new GameOver();
         dialog.pack();
         dialog.setVisible(true);
         System.exit(0);
