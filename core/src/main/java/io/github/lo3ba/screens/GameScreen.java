@@ -3,13 +3,11 @@ package io.github.lo3ba.screens;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
-import com.badlogic.gdx.Input.TextInputListener;
-import com.badlogic.gdx.InputAdapter;
-import io.github.lo3ba.Main;
+import io.github.lo3ba.Main_Game;
 import io.github.lo3ba.entities.Jet;
 
 public class GameScreen implements Screen {
-    private final Main game;
+    private final Main_Game game;
     private OrthographicCamera camera;
     private Jet jet;
     private Texture jetTexture;
@@ -18,7 +16,7 @@ public class GameScreen implements Screen {
     private StringBuilder chatHistory;
     private boolean waitingForChatInput = false;
 
-    public GameScreen(Main game) {
+    public GameScreen(Main_Game game) {
         this.game = game;
         Gdx.app.log("GameScreen", "GameScreen created");
 
