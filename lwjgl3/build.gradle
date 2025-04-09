@@ -136,3 +136,8 @@ startScripts.classpath = project.tasks.jar.outputs.files
 if(enableGraalNative == 'true') {
   apply from: file("nativeimage.gradle")
 }
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(17) // or 11
+  }
+}
