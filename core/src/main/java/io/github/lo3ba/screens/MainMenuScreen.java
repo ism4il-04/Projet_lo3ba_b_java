@@ -11,13 +11,13 @@ import io.github.lo3ba.Main_Game;
 public class MainMenuScreen implements Screen {
 
     private final Main_Game game;
-    private Stage stage;
-    private Texture background;
+    private Stage stage;//pour manager les UI
+    private Texture background;//texture de l'image background
 
     public MainMenuScreen(Main_Game game) {
         this.game = game;
-        this.stage = new Stage(new ScreenViewport());
-        Gdx.input.setInputProcessor(stage);
+        this.stage = new Stage(new ScreenViewport()); //initialisé avec ScreenViewport pour gérer l’adaptation à la taille de l’écran.
+        Gdx.input.setInputProcessor(stage);//dit à LibGDX que tous les événements d’entrée (clavier, souris, etc.) vont au stage
 
         background = new Texture("menu_background.png");
 
@@ -45,8 +45,9 @@ public class MainMenuScreen implements Screen {
             }
         });
 
-        table.add(startButton).pad(20).row();
-        table.add(exitButton).pad(20);
+        table.add(startButton).width(150).height(40).pad(20).row();
+        table.add(exitButton).width(150).height(80).pad(20);
+
 
         stage.addActor(table);
     }
@@ -60,7 +61,7 @@ public class MainMenuScreen implements Screen {
         game.getBatch().draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         game.getBatch().end();
 
-        stage.act(delta);
+        stage.act(delta); //dessine tous les widgets (boutons, textes, etc.).
         stage.draw();
     }
 

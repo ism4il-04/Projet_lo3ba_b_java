@@ -25,7 +25,7 @@ public class Main_Game extends Game {
 
         new Thread(() -> {
             try {
-                Thread.sleep(10000); // delay bach itloada server
+                Thread.sleep(5000); // delay bach itloada server
                 boolean connected = chatClient.connect("localhost", 12345);
                 Gdx.app.postRunnable(() -> {
                     if (connected) {
@@ -77,6 +77,8 @@ public class Main_Game extends Game {
         batch.dispose();
         if (chatClient != null) chatClient.disconnect();
         if (chatServer != null) chatServer.stop();
+        super.dispose();
+        Gdx.app.exit();
     }
     public static void main(String[] args) throws IOException {
         new ChatServer().start(12345);
