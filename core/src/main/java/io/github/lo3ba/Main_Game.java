@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import io.github.lo3ba.network.ChatClient;
 import io.github.lo3ba.network.ChatServer;
 import io.github.lo3ba.screens.GameScreen;
+import io.github.lo3ba.screens.MainMenuScreen;
 
 import java.io.IOException;
 
@@ -17,14 +18,14 @@ public class Main_Game extends Game {
     @Override
     public void create() {
         batch = new SpriteBatch();
-
+        setScreen(new MainMenuScreen(this));
 
         chatClient = new ChatClient("Player_" + (int)(Math.random() * 1000));
 
 
         new Thread(() -> {
             try {
-                Thread.sleep(1000); // delay bach itloada server
+                Thread.sleep(10000); // delay bach itloada server
                 boolean connected = chatClient.connect("localhost", 12345);
                 Gdx.app.postRunnable(() -> {
                     if (connected) {
