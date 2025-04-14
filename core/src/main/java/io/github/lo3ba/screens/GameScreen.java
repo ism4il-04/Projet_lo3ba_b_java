@@ -3,7 +3,9 @@ package io.github.lo3ba.screens;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.utils.Array;
 import io.github.lo3ba.Main_Game;
+import io.github.lo3ba.entities.EnemyJet;
 import io.github.lo3ba.entities.Jet;
 
 public class GameScreen implements Screen {
@@ -15,6 +17,9 @@ public class GameScreen implements Screen {
     private BitmapFont font;
     private StringBuilder chatHistory;
     private boolean waitingForChatInput = false;
+    private Array<EnemyJet> enemies;
+    private float enemySpawnTimer;
+
 
     public GameScreen(Main_Game game) {
         this.game = game;
@@ -94,6 +99,11 @@ public class GameScreen implements Screen {
         font.draw(game.getBatch(), "Contrôles: [FLÈCHES] Bouger | [ESPACE] Tirer | [T] Chat", 10, 30);
         font.draw(game.getBatch(), chatHistory.toString(), 10, camera.viewportHeight - 20);
 
+        for (EnemyJet enemy : enemies) {
+            enemy.render(game.getBatch());
+        }
+
+
         if (waitingForChatInput) {
             font.draw(game.getBatch(), "En train d'écrire...", 10, 60);
         }
@@ -103,6 +113,22 @@ public class GameScreen implements Screen {
 
         handleInput();
         jet.update(delta);
+
+        enemySpawnTimer += delta;
+
+        if (enemySpawnTimer >= 1.5f) { // spawn every 1.5 seconds
+            enemies.add(new EnemyJet());
+            enemySpawnTimer = 0;
+        }
+
+        for (int i = enemies.size - 1; i >= 0; i--) {
+            EnemyJet enemy = enemies.get(i);
+            enemy.update(delta);
+            if (enemy.isOffScreen()) {
+                enemies.removeIndex(i);
+            }
+        }
+
     }
 
     private void handleInput() {
@@ -140,10 +166,18 @@ public class GameScreen implements Screen {
         jetTexture.dispose();
         backgroundTexture.dispose();
         font.dispose();
+        for (EnemyJet enemy : enemies) {
+            enemy.dispose();
+        }
+
     }
 
 
-    @Override public void show() {}
+    @Override public void show() {
+        enemies = new Array<>();
+        enemySpawnTimer = 0;
+
+    }
     @Override public void pause() {}
     @Override public void resume() {}
     @Override public void hide() {}

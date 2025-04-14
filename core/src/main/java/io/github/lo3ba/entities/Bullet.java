@@ -2,6 +2,7 @@ package io.github.lo3ba.entities;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.Rectangle;
 
 public class Bullet extends Sprite {
     private final float speed;
@@ -19,5 +20,9 @@ public class Bullet extends Sprite {
 
     public float getY() {
         return super.getY();
+    }
+
+    public Rectangle getBounds() {
+        return new Rectangle(getX(), getY(), getWidth(), getHeight());
     }
 }
