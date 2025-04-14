@@ -58,4 +58,9 @@ public class Jet {
     }
 
     public Sprite getSprite() { return sprite; }
+
+    public Array getBullets() {
+        return  bullets;
+    }
 }
+

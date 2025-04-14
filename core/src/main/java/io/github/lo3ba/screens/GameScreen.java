@@ -5,7 +5,9 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.utils.Array;
 import io.github.lo3ba.Main_Game;
+import io.github.lo3ba.entities.Bullet;
 import io.github.lo3ba.entities.EnemyJet;
+import io.github.lo3ba.entities.Explosion;
 import io.github.lo3ba.entities.Jet;
 
 public class GameScreen implements Screen {
@@ -19,6 +21,7 @@ public class GameScreen implements Screen {
     private boolean waitingForChatInput = false;
     private Array<EnemyJet> enemies;
     private float enemySpawnTimer;
+    private Array<Explosion> explosions;
 
 
     public GameScreen(Main_Game game) {
@@ -108,6 +111,9 @@ public class GameScreen implements Screen {
             font.draw(game.getBatch(), "En train d'écrire...", 10, 60);
         }
 
+        for (Explosion explosion : explosions) {
+            explosion.render(game.getBatch());
+        }
         game.getBatch().end();
 
 
@@ -128,7 +134,15 @@ public class GameScreen implements Screen {
                 enemies.removeIndex(i);
             }
         }
-
+        checkCollisions();
+        for (int i = explosions.size - 1; i >= 0; i--) {
+            Explosion explosion = explosions.get(i);
+            explosion.update(delta);
+            if (explosion.isExpired()) {
+                explosion.dispose();
+                explosions.removeIndex(i);
+            }
+        }
     }
 
     private void handleInput() {
@@ -153,6 +167,28 @@ public class GameScreen implements Screen {
         }
     }
 
+    private void checkCollisions() {
+        // Iterate through bullets and enemy jets
+        for (int i = jet.getBullets().size - 1; i >= 0; i--) {
+            Bullet bullet = (Bullet) jet.getBullets().get(i);
+
+            for (int j = enemies.size - 1; j >= 0; j--) {
+                EnemyJet enemy = enemies.get(j);
+
+                // Check if bullet overlaps with enemy
+                if (bullet.getBounds().overlaps(enemy.getBounds())) {
+                    // Create an explosion at the enemy's position
+                    explosions.add(new Explosion(new Texture("explosion.png"), enemy.getBounds().x, enemy.getBounds().y));
+
+                    // Remove bullet and enemy
+                    jet.getBullets().removeIndex(i);
+                    enemies.removeIndex(j);
+
+                    break;
+                }
+            }
+        }
+    }
 
     @Override
     public void resize(int width, int height) {
@@ -176,6 +212,7 @@ public class GameScreen implements Screen {
     @Override public void show() {
         enemies = new Array<>();
         enemySpawnTimer = 0;
+        explosions = new Array<>();
 
     }
     @Override public void pause() {}
