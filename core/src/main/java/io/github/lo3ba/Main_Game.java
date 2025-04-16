@@ -5,7 +5,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import io.github.lo3ba.network.ChatClient;
 import io.github.lo3ba.network.ChatServer;
-import io.github.lo3ba.screens.GameScreen;
 import io.github.lo3ba.screens.MainMenuScreen;
 import io.github.lo3ba.screens.MenuScreen;
 
@@ -19,69 +18,62 @@ public class Main_Game extends Game {
     @Override
     public void create() {
         batch = new SpriteBatch();
-        setScreen(new MenuScreen(this));
-
-        chatClient = new ChatClient("Player_" + (int)(Math.random() * 1000));
-
-
-        new Thread(() -> {
-            try {
-                Thread.sleep(5000); // delay bach itloada server
-                boolean connected = chatClient.connect("localhost", 12345);
-                Gdx.app.postRunnable(() -> {
-                    if (connected) {
-                        setScreen(new GameScreen(this));
-                    } else {
-                        Gdx.app.error("Main", "Failed to connect chat");
-                        setScreen(new GameScreen(this)); // Charge quand même le jeu
-                    }
-                });
-            } catch (InterruptedException e) {
-                Gdx.app.error("Main", "Connection thread interrupted", e);
-            }
-        }).start();
+        setScreen(new MainMenuScreen(this));
+        initializeNetwork();
     }
 
-    @Override
-    public void render() {
-        super.render();
-    }
-
-    private void startNetwork() {
+    private void initializeNetwork() {
         new Thread(() -> {
             try {
                 chatServer = new ChatServer();
-                chatServer.start(12345);
-                Gdx.app.log("Network", "Server started on port 12345");
-
-                // stna server
-                Thread.sleep(500);
-
-                chatClient = new ChatClient("Player_" + (int)(Math.random()*1000));
-                if (chatClient.connect("localhost", 12345)) {
-                    Gdx.app.log("Network", "Client connected successfully");
-                } else {
-                    Gdx.app.error("Network", "Client connection failed");
-                }
-            } catch (Exception e) {
-                Gdx.app.error("Network", "Startup failed", e);
+                chatServer.start(12345, this::onServerReady);
+            } catch (IOException e) {
+                Gdx.app.error("NETWORK", "Server failed to start", e);
+                startClientWithRetry();
             }
         }).start();
     }
 
+    private void onServerReady() {
+        Gdx.app.log("NETWORK", "Server ready - starting client");
+        startClientWithRetry();
+    }
+
+    private void startClientWithRetry() {
+        new Thread(() -> {
+            int maxAttempts = 3;
+            int attempt = 0;
+            boolean connected = false;
+
+            while (!connected && attempt < maxAttempts) {
+                attempt++;
+                chatClient = new ChatClient("Player_" + (int)(Math.random()*1000));
+                connected = chatClient.connect("localhost", 12345);
+
+                if (!connected && attempt < maxAttempts) {
+                    try {
+                        Thread.sleep(1000 * attempt);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+            }
+
+            if (connected) {
+                Gdx.app.log("NETWORK", "Client connected successfully");
+            } else {
+                Gdx.app.error("NETWORK", "Failed to connect after " + maxAttempts + " attempts");
+            }
+        }).start();
+    }
 
     public SpriteBatch getBatch() { return batch; }
     public ChatClient getChatClient() { return chatClient; }
 
     @Override
     public void dispose() {
-        batch.dispose();
         if (chatClient != null) chatClient.disconnect();
         if (chatServer != null) chatServer.stop();
-        super.dispose();
-        Gdx.app.exit();
-    }
-    public static void main(String[] args) throws IOException {
-        new ChatServer().start(12345);
+        if (batch != null) batch.dispose();
     }
 }

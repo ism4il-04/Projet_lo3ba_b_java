@@ -98,11 +98,7 @@ public class MenuScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 game.setScreen(new GameScreen(
-                    game,
-                    nameField.getText(),
-                    difficultySelect.getSelected(),
-                    selectedJet
-                ));
+                    game));
             }
         });
         table.add(startButton).colspan(2).pad(20).center();
