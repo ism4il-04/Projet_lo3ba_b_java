@@ -61,11 +61,11 @@ public class GameScreen implements Screen {
 
     private void loadAssets() {
         try {
-            jetTexture = new Texture(Gdx.files.internal("jet1.png"));
-            backgroundTexture = new Texture(Gdx.files.internal("background.png"));
-            enemyTexture = new Texture(Gdx.files.internal("enemy_jet.png"));
+            jetTexture = new Texture(Gdx.files.internal("tyaranadia2.png"));
+            backgroundTexture = new Texture(Gdx.files.internal("fontdecran.png"));
+            enemyTexture = new Texture(Gdx.files.internal("tyaranadia.png"));
             enemyBulletTexture = new Texture(Gdx.files.internal("enemy_bullet.png"));
-            explosionTexture = new Texture(Gdx.files.internal("explosion.png"));
+            explosionTexture = new Texture(Gdx.files.internal("boom.png"));
             playerBulletTexture = new Texture(Gdx.files.internal("shot_1.png"));
             healthIconTexture = new Texture(Gdx.files.internal("health_icon.png"));
 

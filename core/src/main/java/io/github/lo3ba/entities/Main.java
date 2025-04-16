@@ -10,7 +10,17 @@ public class Main {
         config.setTitle("Lo3ba_b_java");
         config.setWindowedMode(800, 600);
         config.setResizable(false);
-        new Lwjgl3Application(new Main_Game(), config);
 
+        // Additional recommended configuration
+        config.setForegroundFPS(60);
+        config.setIdleFPS(30);
+        config.useVsync(true);
+
+        try {
+            new Lwjgl3Application(new Main_Game(), config);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 }

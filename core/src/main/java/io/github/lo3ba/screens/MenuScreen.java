@@ -26,7 +26,7 @@ public class MenuScreen implements Screen {
         skin = new Skin(Gdx.files.internal("uiskin.json"));
 
         // Load jet images
-        jet1Texture = new Texture(Gdx.files.internal("jet1.png"));
+        jet1Texture = new Texture(Gdx.files.internal("tyaranadia2.png"));
         jet2Texture = new Texture(Gdx.files.internal("jet2.png"));
         jet3Texture = new Texture(Gdx.files.internal("jet3.png"));
 
