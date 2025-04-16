@@ -3,16 +3,17 @@ package io.github.lo3ba.entities;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Disposable;
 
-public class Explosion {
-    private final Texture texture;
+public class Explosion implements Disposable {
+    private Texture texture;
     private final Rectangle bounds;
     private float timer;
-    private final float duration = 0.5f; // Explosion lasts for 1 second
+    private final float duration = 0.5f;
 
     public Explosion(Texture texture, float x, float y) {
         this.texture = texture;
-        this.bounds = new Rectangle(x, y, 64, 64); // Explosion size
+        this.bounds = new Rectangle(x, y, 50, 50);
         this.timer = 0;
     }
 
@@ -28,6 +29,7 @@ public class Explosion {
         batch.draw(texture, bounds.x, bounds.y, bounds.width, bounds.height);
     }
 
+    @Override
     public void dispose() {
         texture.dispose();
     }
