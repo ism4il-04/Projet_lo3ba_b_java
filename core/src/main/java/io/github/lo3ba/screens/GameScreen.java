@@ -37,6 +37,19 @@ public class GameScreen implements Screen {
         setupChat();
     }
 
+    public GameScreen(Main_Game game, String text, String selected, String selectedJet) {
+        this.game = game;
+        Gdx.app.log("GameScreen", "GameScreen created");
+
+        this.camera = new OrthographicCamera();
+        this.camera.setToOrtho(false, 800, 600);
+        this.font = new BitmapFont();
+        this.chatHistory = new StringBuilder();
+
+        loadAssets();
+        setupChat();
+    }
+
     private void loadAssets() {
         try {
             jetTexture = new Texture(Gdx.files.internal("jet.png"));

@@ -7,6 +7,7 @@ import io.github.lo3ba.network.ChatClient;
 import io.github.lo3ba.network.ChatServer;
 import io.github.lo3ba.screens.GameScreen;
 import io.github.lo3ba.screens.MainMenuScreen;
+import io.github.lo3ba.screens.MenuScreen;
 
 import java.io.IOException;
 
@@ -18,7 +19,7 @@ public class Main_Game extends Game {
     @Override
     public void create() {
         batch = new SpriteBatch();
-        setScreen(new MainMenuScreen(this));
+        setScreen(new MenuScreen(this));
 
         chatClient = new ChatClient("Player_" + (int)(Math.random() * 1000));
 
