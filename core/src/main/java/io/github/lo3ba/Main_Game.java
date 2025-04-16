@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import io.github.lo3ba.network.ChatClient;
 import io.github.lo3ba.network.ChatServer;
+import io.github.lo3ba.screens.GameOverScreen;
 import io.github.lo3ba.screens.GameScreen;
 import io.github.lo3ba.screens.MainMenuScreen;
 import io.github.lo3ba.screens.MenuScreen;
@@ -19,7 +20,7 @@ public class Main_Game extends Game {
     @Override
     public void create() {
         batch = new SpriteBatch();
-        setScreen(new MenuScreen(this));
+        setScreen(new GameOverScreen(this, 100));
 
         chatClient = new ChatClient("Player_" + (int)(Math.random() * 1000));
 
