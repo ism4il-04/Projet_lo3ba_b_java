@@ -3,6 +3,7 @@ package io.github.lo3ba.screens;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import io.github.lo3ba.Main_Game;
@@ -27,6 +28,12 @@ public class GameScreen implements Screen {
     private Texture explosionTexture;
     private Texture playerBulletTexture;
     private Texture healthIconTexture;
+    private Array<PowerUp> powerUps;
+    private Texture healthPowerTexture;
+    private Texture shieldPowerTexture;
+    private Texture rapidFirePowerTexture;
+    private Texture spreadShotPowerTexture;
+    private Texture bombPowerTexture;
     private int playerScore = 0;
     private boolean gameOver = false;
     private float gameOverTimer = 0;
@@ -41,6 +48,7 @@ public class GameScreen implements Screen {
         this.font = new BitmapFont();
         this.scoreFont = new BitmapFont();
         this.chatHistory = new StringBuilder();
+        this.powerUps = new Array<>();
 
         loadAssets();
         setupChat();
@@ -68,7 +76,11 @@ public class GameScreen implements Screen {
             explosionTexture = new Texture(Gdx.files.internal("boom.png"));
             playerBulletTexture = new Texture(Gdx.files.internal("shot_1.png"));
             healthIconTexture = new Texture(Gdx.files.internal("health_icon.png"));
-
+            healthPowerTexture = new Texture(Gdx.files.internal("HP_Bonus.png"));
+            shieldPowerTexture = new Texture(Gdx.files.internal("Armor_Bonus.png"));
+            rapidFirePowerTexture = new Texture(Gdx.files.internal("Damage_Bonus.png"));
+            spreadShotPowerTexture = new Texture(Gdx.files.internal("Rockets_Bonus.png"));
+            bombPowerTexture = new Texture(Gdx.files.internal("Enemy_Destroy_Bonus.png"));
             setTextureFilters();
 
             scoreFont.getData().setScale(1.5f);
@@ -94,6 +106,11 @@ public class GameScreen implements Screen {
         explosionTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         playerBulletTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         healthIconTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        healthPowerTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        shieldPowerTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        rapidFirePowerTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        spreadShotPowerTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        bombPowerTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
     }
     private void createFallbackTextures() {//bach la 9adara lah w matloadawch l assets nqdiw gharad b hado
 
@@ -132,6 +149,36 @@ public class GameScreen implements Screen {
         explosionPixmap.fillCircle(25, 25, 25);
         explosionTexture = new Texture(explosionPixmap);
         explosionPixmap.dispose();
+
+        Pixmap healthPowerPixmap = new Pixmap(30, 30, Pixmap.Format.RGBA8888);
+        healthPowerPixmap.setColor(Color.GREEN);
+        healthPowerPixmap.fillCircle(15, 15, 15);
+        healthPowerTexture = new Texture(healthPowerPixmap);
+        healthPowerPixmap.dispose();
+
+        Pixmap rapidFirePixmap = new Pixmap(30, 30, Pixmap.Format.RGBA8888);
+        rapidFirePixmap.setColor(Color.YELLOW);
+        rapidFirePixmap.fillCircle(15, 15, 15);
+        rapidFirePowerTexture = new Texture(rapidFirePixmap);
+        rapidFirePixmap.dispose();
+
+        Pixmap spreadShotPixmap = new Pixmap(30, 30, Pixmap.Format.RGBA8888);
+        spreadShotPixmap.setColor(Color.PURPLE);
+        spreadShotPixmap.fillCircle(15, 15, 15);
+        spreadShotPowerTexture = new Texture(spreadShotPixmap);
+        spreadShotPixmap.dispose();
+
+        Pixmap bombPixmap = new Pixmap(30, 30, Pixmap.Format.RGBA8888);
+        bombPixmap.setColor(Color.RED);
+        bombPixmap.fillCircle(15, 15, 15);
+        bombPowerTexture = new Texture(bombPixmap);
+        bombPixmap.dispose();
+
+        Pixmap shieldPowerPixmap = new Pixmap(30, 30, Pixmap.Format.RGBA8888);
+        shieldPowerPixmap.setColor(Color.BLUE);
+        shieldPowerPixmap.fillCircle(15, 15, 15);
+        shieldPowerTexture = new Texture(shieldPowerPixmap);
+        shieldPowerPixmap.dispose();
 
         Pixmap healthPixmap = new Pixmap(healthIconSize, healthIconSize, Pixmap.Format.RGBA8888);
         healthPixmap.setColor(Color.GREEN);
@@ -192,6 +239,10 @@ public class GameScreen implements Screen {
             explosion.render(game.getBatch());
         }
 
+        // Draw power-ups
+        for (PowerUp powerUp : powerUps) {
+            powerUp.draw(game.getBatch());
+        }
         //  health icons
         for (int i = 0; i < jet.getHealth(); i++) {
             game.getBatch().draw(healthIconTexture,
@@ -222,9 +273,47 @@ public class GameScreen implements Screen {
             handleInput();
             jet.update(delta);
             updateEnemies(delta);
+            updatePowerUps(delta);
             checkCollisions();
             updateExplosions(delta);
             checkGameOver();
+        }
+    }
+    public void spawnPowerUp(PowerUp.Type type, float x, float y) {
+        Texture texture = null;
+        switch (type) {
+            case HEALTH: texture = healthPowerTexture; break;
+            case SHIELD: texture = shieldPowerTexture; break;
+            case RAPID_FIRE: texture = rapidFirePowerTexture; break;
+            case SPREAD_SHOT: texture = spreadShotPowerTexture; break;
+            case BOMB: texture = bombPowerTexture; break;
+        }
+
+        if (texture != null) {
+            powerUps.add(new PowerUp(texture, type, x, y));
+        }
+    }
+
+    private void updatePowerUps(float delta) {
+        for (Iterator<PowerUp> iterator = powerUps.iterator(); iterator.hasNext();) {
+            PowerUp powerUp = iterator.next();
+            powerUp.update(delta);
+
+            if (powerUp.getBounds().overlaps(jet.getSprite().getBoundingRectangle())) {
+                jet.applyPowerUp(powerUp.getType());
+
+                if (powerUp.getType() == PowerUp.Type.BOMB) {
+                    for (EnemyJet enemy : enemies) {
+                        explosions.add(new Explosion(explosionTexture, enemy.getBounds().x, enemy.getBounds().y));
+                        playerScore += 100;
+                    }
+                    enemies.clear();
+                }
+
+                iterator.remove();
+            } else if (powerUp.getY() < -30 || !powerUp.isActive()) {
+                iterator.remove();
+            }
         }
     }
 
@@ -243,7 +332,7 @@ public class GameScreen implements Screen {
     private void updateEnemies(float delta) {
         enemySpawnTimer += delta;
         if (enemySpawnTimer >= 1.5f) {
-            enemies.add(new EnemyJet(enemyTexture, enemyBulletTexture, jet));
+            enemies.add(new EnemyJet(enemyTexture, enemyBulletTexture, jet,this));
             enemySpawnTimer = 0;
         }
 
@@ -251,7 +340,7 @@ public class GameScreen implements Screen {
             EnemyJet enemy = iterator.next();
             enemy.update(delta);
 
-            if (enemy.isOffScreen()) {
+            if (enemy.isOffScreen() || !enemy.isAlive()) {
                 iterator.remove();
             }
         }
@@ -268,6 +357,7 @@ public class GameScreen implements Screen {
                 if (bullet.getBounds().overlaps(enemy.getBounds())) {
                     explosions.add(new Explosion(explosionTexture, enemy.getBounds().x, enemy.getBounds().y));
                     bulletIterator.remove();
+                    enemy.die();
                     enemyIterator.remove();
                     playerScore += 100;
                     break;
@@ -349,11 +439,20 @@ public class GameScreen implements Screen {
         healthIconTexture.dispose();
         font.dispose();
         scoreFont.dispose();
-
+        healthPowerTexture.dispose();
+        shieldPowerTexture.dispose();
+        rapidFirePowerTexture.dispose();
+        spreadShotPowerTexture.dispose();
+        bombPowerTexture.dispose();
         for (EnemyJet enemy : enemies) {
             enemy.dispose();
         }
         explosions.clear();
+
+        for (PowerUp powerUp : powerUps) {
+            powerUp.getTexture().dispose();
+        }
+        powerUps.clear();
     }
 
     @Override
@@ -361,6 +460,7 @@ public class GameScreen implements Screen {
         enemies = new Array<>();
         enemySpawnTimer = 0;
         explosions = new Array<>();
+        powerUps = new Array<>();
         playerScore = 0;
         gameOver = false;
         gameOverTimer = 0;

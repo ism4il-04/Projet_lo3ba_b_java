@@ -22,6 +22,11 @@ public class Jet implements Disposable {
     private boolean isInvulnerable = false;
     private float invulnerabilityTimer = 0;
     private final float invulnerabilityDuration = 1.5f;
+    private float currentFireRate = 0.2f;
+    private boolean hasShield = false;
+    private float powerUpTimer = 0;
+    private PowerUp.Type activePowerUp = null;
+    private int bulletCount = 1;
 
     public Jet(Texture texture, Texture bulletTexture) {
         this.sprite = new Sprite(texture);
@@ -41,11 +46,59 @@ public class Jet implements Disposable {
         );
     }
 
+
     public void update(float delta) {
         handleMovement(delta);
         handleShooting(delta);
         updateBullets(delta);
         updateInvulnerability(delta);
+        updatePowerUps(delta);
+    }
+    private void updatePowerUps(float delta) {
+        if (activePowerUp != null) {
+            powerUpTimer += delta;
+            if (powerUpTimer >= getPowerUpDuration(activePowerUp)) {
+                resetPowerUp();
+            }
+        }
+    }
+    private float getPowerUpDuration(PowerUp.Type type) {
+        switch (type) {
+            case SHIELD: return 5f;
+            case RAPID_FIRE: return 10f;
+            case SPREAD_SHOT: return 8f;
+            default: return 0f;
+        }
+    }
+
+    private void resetPowerUp() {
+        currentFireRate = 0.2f;
+        bulletCount = 1;
+        setInvulnerable(false);
+        activePowerUp = null;
+        powerUpTimer = 0;
+    }
+    public void applyPowerUp(PowerUp.Type type) {
+        activePowerUp = type;
+        powerUpTimer = 0;
+
+        switch (type) {
+            case HEALTH:
+                heal(1);
+                break;
+            case SHIELD:
+                setInvulnerable(true);
+                break;
+            case RAPID_FIRE:
+                currentFireRate = 0.1f;
+                break;
+            case SPREAD_SHOT:
+                bulletCount = 3;
+                break;
+            case BOMB:
+                // Géré dans GameScreen
+                break;
+        }
     }
 
     private void updateInvulnerability(float delta) {
@@ -84,12 +137,25 @@ public class Jet implements Disposable {
     }
 
     private void fireBullet() {
-        bullets.add(new Bullet(
-            bulletTexture,
-            sprite.getX() + sprite.getWidth()/2f - 5f,
-            sprite.getY() + sprite.getHeight(),
-            500f
-        ));
+        if (bulletCount == 1) {
+            bullets.add(new Bullet(
+                bulletTexture,
+                sprite.getX() + sprite.getWidth()/2f - 5f,
+                sprite.getY() + sprite.getHeight(),
+                500f
+            ));
+        } else {
+            // Spread shot
+            for (int i = 0; i < bulletCount; i++) {
+                float offset = (i - (bulletCount-1)/2f) * 15f;
+                bullets.add(new Bullet(
+                    bulletTexture,
+                    sprite.getX() + sprite.getWidth()/2f - 5f + offset,
+                    sprite.getY() + sprite.getHeight(),
+                    500f
+                ));
+            }
+        }
     }
 
     private void updateBullets(float delta) {
@@ -102,6 +168,7 @@ public class Jet implements Disposable {
         }
     }
 
+
     public void takeDamage(int damage) {
         if (!isInvulnerable) {
             health = Math.max(0, health - damage);
@@ -109,7 +176,9 @@ public class Jet implements Disposable {
             invulnerabilityTimer = 0;
         }
     }
-
+    public void heal(int amount) {
+        health = Math.min(maxHealth, health + amount);
+    }
     public void draw(SpriteBatch batch) {
         if (!isInvulnerable || (isInvulnerable && ((int)(invulnerabilityTimer * 10) % 2) == 0)) {
             sprite.draw(batch);
@@ -122,6 +191,10 @@ public class Jet implements Disposable {
 
     public void setShootingEnabled(boolean enabled) {
         this.isShootingEnabled = enabled;
+    }
+    public void setInvulnerable(boolean invulnerable) {
+        this.isInvulnerable = invulnerable;
+        if (!invulnerable) invulnerabilityTimer = 0;
     }
 
     @Override

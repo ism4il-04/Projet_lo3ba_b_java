@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Disposable;
+import io.github.lo3ba.screens.GameScreen;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,14 +22,16 @@ public class EnemyJet implements Disposable {
     private float directionChangeTimer = 0;
     private float directionX = 1;
     private final Jet playerJet;
+    private boolean isAlive = true;
+    private final GameScreen gameScreen;
 
-    public EnemyJet(Texture texture, Texture bulletTexture, Jet playerJet) {
+    public EnemyJet(Texture texture, Texture bulletTexture, Jet playerJet, GameScreen gameScreen) {
         this.sprite = new Sprite(texture);
         this.sprite.setSize(60, 60);
         this.bullets = new ArrayList<>();
         this.bulletTexture = bulletTexture;
         this.playerJet = playerJet;
-
+        this.gameScreen= gameScreen;
 
         this.sprite.setPosition(
             MathUtils.random(0, Gdx.graphics.getWidth() - sprite.getWidth()),
@@ -72,7 +76,14 @@ public class EnemyJet implements Disposable {
             }
         }
     }
-
+    public void die() {
+        isAlive = false;
+        if (MathUtils.random() < 0.2f) { // 20% de chance de drop
+            PowerUp.Type[] types = PowerUp.Type.values();
+            PowerUp.Type randomType = types[MathUtils.random(0, types.length - 2)]; // Exclure BOMB
+            gameScreen.spawnPowerUp(randomType, sprite.getX(), sprite.getY());
+        }
+    }
     private void fireBullet() {
         float startX = sprite.getX() + sprite.getWidth()/2f - 5f;
         float startY = sprite.getY();
@@ -88,12 +99,12 @@ public class EnemyJet implements Disposable {
     }
 
     public void render(SpriteBatch batch) {
+        if (!isAlive) return;
         sprite.draw(batch);
         for (DirectedBullet bullet : bullets) {
             bullet.draw(batch);
         }
     }
-
     public boolean isOffScreen() {
         return sprite.getY() + sprite.getHeight() < 0;
     }
@@ -105,7 +116,9 @@ public class EnemyJet implements Disposable {
     public List<DirectedBullet> getBullets() {
         return bullets;
     }
-
+    public boolean isAlive() {
+        return isAlive;
+    }
     @Override
     public void dispose() {
         for (DirectedBullet bullet : bullets) {
