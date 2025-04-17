@@ -3,7 +3,6 @@ package io.github.lo3ba.screens;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import io.github.lo3ba.Main_Game;
@@ -40,6 +39,7 @@ public class GameScreen implements Screen {
     private final float gameOverDelay = 3f;
     private final int healthIconSize = 30;
     private final int healthIconPadding = 5;
+    private boolean isPaused = false;
 
     public GameScreen(Main_Game game) {
         this.game = game;
@@ -112,8 +112,8 @@ public class GameScreen implements Screen {
         spreadShotPowerTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         bombPowerTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
     }
-    private void createFallbackTextures() {//bach la 9adara lah w matloadawch l assets nqdiw gharad b hado
 
+    private void createFallbackTextures() {
         Pixmap jetPixmap = new Pixmap(60, 60, Pixmap.Format.RGBA8888);
         jetPixmap.setColor(Color.RED);
         jetPixmap.fillTriangle(30, 0, 0, 60, 60, 60);
@@ -190,7 +190,6 @@ public class GameScreen implements Screen {
         healthIconTexture = new Texture(healthPixmap);
         healthPixmap.dispose();
 
-
         jet = new Jet(jetTexture, playerBulletTexture);
         jet.getSprite().setPosition(
             camera.viewportWidth/2 - jet.getSprite().getWidth()/2,
@@ -216,6 +215,8 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
+        handleInput();
+
         if (gameOver) {
             handleGameOver(delta);
             return;
@@ -230,7 +231,6 @@ public class GameScreen implements Screen {
         game.getBatch().begin();
         game.getBatch().draw(backgroundTexture, 0, 0, camera.viewportWidth, camera.viewportHeight);
 
-        // Draw game elements
         jet.draw(game.getBatch());
         for (EnemyJet enemy : enemies) {
             enemy.render(game.getBatch());
@@ -238,12 +238,10 @@ public class GameScreen implements Screen {
         for (Explosion explosion : explosions) {
             explosion.render(game.getBatch());
         }
-
-        // Draw power-ups
         for (PowerUp powerUp : powerUps) {
             powerUp.draw(game.getBatch());
         }
-        //  health icons
+
         for (int i = 0; i < jet.getHealth(); i++) {
             game.getBatch().draw(healthIconTexture,
                 10 + i * (healthIconSize + healthIconPadding),
@@ -252,25 +250,30 @@ public class GameScreen implements Screen {
                 healthIconSize);
         }
 
-        // score
         scoreFont.draw(game.getBatch(),
             "Score: " + playerScore,
             camera.viewportWidth - 150,
             camera.viewportHeight - 30);
 
-
-      //  font.draw(game.getBatch(), "Contrôles: [FLÈCHES] Bouger | [ESPACE] Tirer | [T] Chat", 10, 30); (hit katgheti douk les icones lte7t hta nchouf fin n7toha)
         font.draw(game.getBatch(), chatHistory.toString(), 10, camera.viewportHeight - 20);
 
         if (waitingForChatInput) {
             font.draw(game.getBatch(), "En train d'écrire...", 10, 60);
         }
 
+        if (isPaused) {
+            font.getData().setScale(2.0f);
+            font.setColor(Color.YELLOW);
+            font.draw(game.getBatch(), "PAUSE",
+                camera.viewportWidth / 2 - 50,
+                camera.viewportHeight / 2 + 20);
+            font.getData().setScale(1.0f);
+            font.setColor(Color.WHITE);
+        }
+
         game.getBatch().end();
 
-
-        if (!gameOver) {
-            handleInput();
+        if (!isPaused && !gameOver) {
             jet.update(delta);
             updateEnemies(delta);
             updatePowerUps(delta);
@@ -279,6 +282,7 @@ public class GameScreen implements Screen {
             checkGameOver();
         }
     }
+
     public void spawnPowerUp(PowerUp.Type type, float x, float y) {
         Texture texture = null;
         switch (type) {
@@ -347,7 +351,6 @@ public class GameScreen implements Screen {
     }
 
     private void checkCollisions() {
-        // Player bullets vs enemies
         for (Iterator<Bullet> bulletIterator = jet.getBullets().iterator(); bulletIterator.hasNext();) {
             Bullet bullet = bulletIterator.next();
 
@@ -365,13 +368,12 @@ public class GameScreen implements Screen {
             }
         }
 
-        // Enemy bullets vs player
         for (EnemyJet enemy : enemies) {
             for (Iterator<DirectedBullet> bulletIterator = enemy.getBullets().iterator(); bulletIterator.hasNext();) {
                 DirectedBullet bullet = bulletIterator.next();
 
                 if (bullet.getBounds().overlaps(jet.getSprite().getBoundingRectangle())) {
-                    jet.takeDamage(1); // we lose 1 life
+                    jet.takeDamage(1);
                     bulletIterator.remove();
 
                     if (jet.getHealth() <= 0) {
@@ -401,9 +403,17 @@ public class GameScreen implements Screen {
     }
 
     private void handleInput() {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+            isPaused = !isPaused;
+            Gdx.app.log("GameScreen", "Game " + (isPaused ? "paused" : "resumed"));
+        }
+
+        if (isPaused) {
+            return;
+        }
+
         if (Gdx.input.isKeyJustPressed(Input.Keys.T) && !waitingForChatInput) {
             waitingForChatInput = true;
-
             new Thread(() -> {
                 String text = javax.swing.JOptionPane.showInputDialog(null, "Entrez votre message :", "Chat", javax.swing.JOptionPane.PLAIN_MESSAGE);
                 if (text != null && !text.trim().isEmpty()) {
@@ -464,9 +474,22 @@ public class GameScreen implements Screen {
         playerScore = 0;
         gameOver = false;
         gameOverTimer = 0;
+        isPaused = false;
     }
 
-    @Override public void pause() {}
-    @Override public void resume() {}
-    @Override public void hide() {}
+    @Override
+    public void pause() {
+        isPaused = true;
+        Gdx.app.log("GameScreen", "Game paused (app focus lost)");
+    }
+
+    @Override
+    public void resume() {
+        isPaused = false;
+        Gdx.app.log("GameScreen", "Game resumed (app focus regained)");
+    }
+
+    @Override
+    public void hide() {
+    }
 }
