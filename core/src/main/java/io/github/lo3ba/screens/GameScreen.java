@@ -1,6 +1,8 @@
 package io.github.lo3ba.screens;
 
 import com.badlogic.gdx.*;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.backends.lwjgl3.audio.Wav;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Rectangle;
@@ -10,6 +12,7 @@ import io.github.lo3ba.entities.*;
 import java.util.Iterator;
 
 public class GameScreen implements Screen {
+    private Wav.Music music;
     private final Main_Game game;
     private OrthographicCamera camera;
     private Jet jet;
@@ -96,6 +99,12 @@ public class GameScreen implements Screen {
             Gdx.app.error("GameScreen", "Failed to load assets", e);
             createFallbackTextures();
         }
+
+        Music music= Gdx.audio.newMusic(Gdx.files.internal("music.wav"));
+        music.setVolume(0.5f);
+        music.setLooping(true);
+        music.play();
+
     }
 
     private void setTextureFilters() {
@@ -440,6 +449,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
+        music.dispose();
         jetTexture.dispose();
         backgroundTexture.dispose();
         enemyTexture.dispose();
