@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import io.github.lo3ba.DAO.Player;
 import io.github.lo3ba.Main_Game;
 
 public class MenuScreen implements Screen {
@@ -97,6 +98,11 @@ public class MenuScreen implements Screen {
         startButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                Player player=new Player();
+                player.meilleurScore=0;
+                player.id=1;
+                player.name = nameField.getText();
+                player.Ajouter(player);
                 game.setScreen(new GameScreen(
                     game));
             }
