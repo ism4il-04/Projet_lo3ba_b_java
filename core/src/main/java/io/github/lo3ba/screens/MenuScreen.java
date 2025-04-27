@@ -69,52 +69,6 @@ public class MenuScreen implements Screen {
         table.add(addButton).colspan(2).pad(20).center();
         table.row();
 
-        /*
-        // Difficulty Selection
-        final SelectBox<String> difficultySelect = new SelectBox<>(skin);
-        difficultySelect.setItems("Easy", "Normal", "Hard");
-        table.add(new Label("Select Difficulty:", skin)).pad(10);
-        table.add(difficultySelect).pad(10).width(200);
-        table.row();
-
-        // Jet Selection with Preview Image
-        final SelectBox<String> jetSelect = new SelectBox<>(skin);
-        jetSelect.setItems("Jet1", "Jet2", "Jet3");
-        table.add(new Label("Select Jet:", skin)).pad(10);
-        table.add(jetSelect).pad(10).width(200);
-        table.row();
-
-        jetPreview = new Image(new TextureRegionDrawable(new TextureRegion(jet1Texture)));
-        table.add(jetPreview).colspan(2).pad(10).width(100).height(100);
-        table.row();
-
-        // Update jet preview when selection changes
-        jetSelect.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                selectedJet = jetSelect.getSelected();
-                updateJetPreview();
-            }
-        });
-
-        // Sliders for Speed, Attack, Life
-        Slider speedSlider = new Slider(1, 100, 1, false, skin);
-        Slider attackSlider = new Slider(1, 100, 1, false, skin);
-        Slider lifeSlider = new Slider(1, 100, 1, false, skin);
-
-        table.add(new Label("Speed:", skin)).pad(10);
-        table.add(speedSlider).pad(10).width(200);
-        table.row();
-
-        table.add(new Label("Attack:", skin)).pad(10);
-        table.add(attackSlider).pad(10).width(200);
-        table.row();
-
-        table.add(new Label("Life:", skin)).pad(10);
-        table.add(lifeSlider).pad(10).width(200);
-        table.row();
-
-        */
         Table settingsTable = new Table(); // C'est notre sous-table
         table.add(settingsTable).colspan(2).pad(10);
         table.row();
