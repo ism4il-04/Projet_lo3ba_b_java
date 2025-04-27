@@ -99,10 +99,7 @@ public class MenuScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 Player player=new Player();
-                player.meilleurScore=0;
-                player.id=1;
-                player.name = nameField.getText();
-                player.Ajouter(player);
+                player.Ajouter(nameField.getText());
                 game.setScreen(new GameScreen(
                     game));
             }
