@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Select;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.lo3ba.DAO.Player;
 import io.github.lo3ba.Main_Game;
@@ -44,11 +45,31 @@ public class MenuScreen implements Screen {
         table.row();
 
         // Player Name Input
-        final TextField nameField = new TextField("Player", skin);
-        table.add(new Label("Enter Name:", skin)).pad(10);
-        table.add(nameField).pad(10).width(200);
+        Player temp = new Player();
+        final SelectBox<String> nameSelect = new SelectBox<>(skin);
+        nameSelect.setItems(temp.getAllPlayersNames());
+        table.add(new Label("Select existing players:", skin)).pad(10);
+        table.add(nameSelect).pad(10).width(200);
         table.row();
 
+        final TextField nameField = new TextField("", skin);
+        table.add(new Label("Enter new player:", skin)).pad(10);
+        table.add(nameField).pad(10).width(200);
+        table.row();
+        // Start Button
+        TextButton addButton = new TextButton("Ajouter Joueur", skin);
+        addButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Player player=new Player();
+                player.Ajouter(nameField.getText());
+                game.setScreen(new MenuScreen(game));
+            }
+        });
+        table.add(addButton).colspan(2).pad(20).center();
+        table.row();
+
+        /*
         // Difficulty Selection
         final SelectBox<String> difficultySelect = new SelectBox<>(skin);
         difficultySelect.setItems("Easy", "Normal", "Hard");
@@ -93,18 +114,82 @@ public class MenuScreen implements Screen {
         table.add(lifeSlider).pad(10).width(200);
         table.row();
 
+        */
+        Table settingsTable = new Table(); // C'est notre sous-table
+        table.add(settingsTable).colspan(2).pad(10);
+        table.row();
+
+// Partie Gauche (difficulty, jet selection, preview)
+        Table leftTable = new Table();
+
+// Difficulty Selection
+        final SelectBox<String> difficultySelect = new SelectBox<>(skin);
+        difficultySelect.setItems("easy", "normal", "hard");
+        leftTable.add(new Label("Select Difficulty:", skin)).pad(10).left();
+        leftTable.row();
+        leftTable.add(difficultySelect).pad(10).width(200);
+        leftTable.row();
+
+// Jet Selection
+        final SelectBox<String> jetSelect = new SelectBox<>(skin);
+        jetSelect.setItems("jet1", "jet2", "jet3");
+        leftTable.add(new Label("Select Jet:", skin)).pad(10).left();
+        leftTable.row();
+        leftTable.add(jetSelect).pad(10).width(200);
+        leftTable.row();
+
+// Jet Preview
+        jetPreview = new Image(new TextureRegionDrawable(new TextureRegion(jet1Texture)));
+        leftTable.add(jetPreview).pad(1).width(100).height(100);
+        leftTable.row();
+        jetSelect.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                selectedJet = jetSelect.getSelected();
+                updateJetPreview();
+            }
+        });
+
+// Partie Droite (les sliders)
+        Table rightTable = new Table();
+
+// Sliders
+        Slider speedSlider = new Slider(1, 100, 1, false, skin);
+        Slider attackSlider = new Slider(1, 100, 1, false, skin);
+        Slider lifeSlider = new Slider(1, 100, 1, false, skin);
+
+        rightTable.add(new Label("Speed:", skin)).pad(10).left();
+        rightTable.row();
+        rightTable.add(speedSlider).pad(1).width(200);
+        rightTable.row();
+
+        rightTable.add(new Label("Attack:", skin)).pad(10).left();
+        rightTable.row();
+        rightTable.add(attackSlider).pad(1).width(200);
+        rightTable.row();
+
+        rightTable.add(new Label("Life:", skin)).pad(10).left();
+        rightTable.row();
+        rightTable.add(lifeSlider).pad(1).width(200);
+        rightTable.row();
+
+// Ajout des deux sous-tables dans la grande sous-table settingsTable
+        settingsTable.add(leftTable).pad(10).top();
+        settingsTable.add(rightTable).pad(10).top();
+        table.row(); // Pour continuer avec les boutons après
+// === FIN NOUVELLE SOUS-TABLE ===
+
         // Start Button
         TextButton startButton = new TextButton("Start Game", skin);
         startButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                Player player=new Player();
-                player.Ajouter(nameField.getText());
-                game.setScreen(new GameScreen(
-                    game));
+                /*game.setScreen(new GameScreen(
+                    game));*/
+                game.setScreen(new GameScreen(game,nameSelect.getSelected(), difficultySelect.getSelected(), jetSelect.getSelected()));
             }
         });
-        table.add(startButton).colspan(2).pad(20).center();
+        table.add(startButton).colspan(2).center();
         table.row();
 
         // Exit Button
@@ -121,10 +206,10 @@ public class MenuScreen implements Screen {
     private void updateJetPreview() {
         TextureRegionDrawable drawable;
         switch (selectedJet) {
-            case "Jet2":
+            case "jet2":
                 drawable = new TextureRegionDrawable(new TextureRegion(jet2Texture));
                 break;
-            case "Jet3":
+            case "jet3":
                 drawable = new TextureRegionDrawable(new TextureRegion(jet3Texture));
                 break;
             default:

@@ -1,5 +1,7 @@
 package io.github.lo3ba.DAO;
 
+import com.badlogic.gdx.utils.Array;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -61,8 +63,8 @@ public class Player {
     }
 
 
-    public List<String> getAllPlayersNames(){
-        List<String> players = new ArrayList<String>();
+    public Array<String> getAllPlayersNames(){
+        Array<String> players = new Array<>();
         try {
             Statement stm = ConnexionBD.seConnecter();
             ResultSet rs=stm.executeQuery("SELECT nom FROM player");
