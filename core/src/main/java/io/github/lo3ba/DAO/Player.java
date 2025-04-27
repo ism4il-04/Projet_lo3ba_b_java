@@ -62,6 +62,23 @@ public class Player {
         return players;
     }
 
+    public List<Player> getTop3Players() {
+        List<Player> players = new ArrayList<Player>();
+        try {
+            Statement stm = ConnexionBD.seConnecter();
+            ResultSet rs = stm.executeQuery("SELECT * FROM player ORDER BY meilleurScore DESC LIMIT 3");
+            while (rs.next()) {
+                int id1 = rs.getInt(1);
+                String name = rs.getString(2);
+                int meilleurScore = rs.getInt(3);
+                String niveau = rs.getString(4);
+                players.add(new Player(id1, name, meilleurScore, niveau));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return players;
+    }
 
     public Array<String> getAllPlayersNames(){
         Array<String> players = new Array<>();
