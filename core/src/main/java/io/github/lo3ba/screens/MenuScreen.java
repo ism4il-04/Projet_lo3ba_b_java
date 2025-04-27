@@ -66,7 +66,6 @@ public class MenuScreen implements Screen {
         table.row();
 
         // Player Name Input
-        Player temp = new Player();
         final SelectBox<String> nameSelect = new SelectBox<>(skin);
         nameSelect.setItems(temp.getAllPlayersNames());
         table.add(new Label("Select existing players:", skin)).pad(10);
