@@ -3,10 +3,9 @@ package io.github.lo3ba;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import io.github.lo3ba.network.ChatClient;
-import io.github.lo3ba.network.ChatServer;
+import io.github.lo3ba.network.chat.ChatClient;
+import io.github.lo3ba.network.chat.ChatServer;
 import io.github.lo3ba.screens.MainMenuScreen;
-import io.github.lo3ba.screens.MenuScreen;
 
 import java.io.IOException;
 

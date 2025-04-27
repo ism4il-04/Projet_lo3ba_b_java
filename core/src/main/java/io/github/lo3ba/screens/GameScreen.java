@@ -381,7 +381,7 @@ public class GameScreen implements Screen {
             for (Iterator<DirectedBullet> bulletIterator = enemy.getBullets().iterator(); bulletIterator.hasNext();) {
                 DirectedBullet bullet = bulletIterator.next();
 
-                if (bullet.getBounds().overlaps(jet.getSprite().getBoundingRectangle())) {
+                 if (bullet.getBounds().overlaps(jet.getSprite().getBoundingRectangle())) {
                     jet.takeDamage(1);
                     bulletIterator.remove();
 

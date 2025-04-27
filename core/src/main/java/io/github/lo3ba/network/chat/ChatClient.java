@@ -1,4 +1,4 @@
-package io.github.lo3ba.network;
+package io.github.lo3ba.network.chat;
 
 import com.badlogic.gdx.Gdx;
 import java.io.*;
