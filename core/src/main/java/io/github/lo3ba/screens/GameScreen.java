@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import io.github.lo3ba.DAO.Matche;
+import io.github.lo3ba.DAO.Player;
 import io.github.lo3ba.Main_Game;
 import io.github.lo3ba.entities.*;
 import java.util.Iterator;
@@ -345,6 +346,8 @@ public class GameScreen implements Screen {
         if (gameOverTimer >= gameOverDelay) {
             Matche matche = new Matche();
             matche.AjouterMatche(playerName,playerScore,difficulty);
+            Player p=new Player();
+            p.majScoreSiDepasse(playerName,playerScore);
             game.setScreen(new MenuScreen(game));
         }
 

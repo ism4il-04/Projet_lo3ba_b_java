@@ -28,10 +28,25 @@ public class Player {
         this.name = name;
     }
 
-    public void MajScore(String nom, int score) {
+    public void majScoreSiDepasse(String nom, int score) {
         try {
             Statement stm = ConnexionBD.seConnecter();
-            stm.executeUpdate("update Player set meilleurScore ="+score+" where nom ='"+nom+"'");
+
+            // Retrieve the current meilleurScore for the player
+            ResultSet rs = stm.executeQuery("SELECT meilleurScore FROM Player WHERE nom = '" + nom + "'");
+            if (rs.next()) {
+                int meilleurScore = rs.getInt("meilleurScore");
+
+                // Update the score only if the new score is higher
+                if (score > meilleurScore) {
+                    stm.executeUpdate("UPDATE Player SET meilleurScore = " + score + " WHERE nom = '" + nom + "'");
+                    System.out.println("Score mis à jour pour " + nom);
+                } else {
+                    System.out.println("Le nouveau score n'est pas supérieur au meilleur score actuel.");
+                }
+            } else {
+                System.out.println("Aucun joueur trouvé avec le nom : " + nom);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -93,5 +108,6 @@ public class Player {
         }
         return players;
     }
+
 
 }
