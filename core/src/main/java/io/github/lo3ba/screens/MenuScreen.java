@@ -39,6 +39,25 @@ public class MenuScreen implements Screen {
         Table table = new Table();
         table.setFillParent(true);
         stage.addActor(table);
+        // Top-Right Table for Top 3 Players
+        Table topRightTable = new Table();
+        topRightTable.setPosition(Gdx.graphics.getWidth() -75, Gdx.graphics.getHeight() -75); // Align to top-right corner
+        stage.addActor(topRightTable);
+
+        // Label for Top 3 Players
+        Label topPlayersLabel = new Label("Top 3 Players", skin);
+        topRightTable.add(topPlayersLabel).pad(10);
+        topRightTable.row();
+
+        // Fetch Top 3 Players
+        Player temp = new Player();
+        List<Player> topPlayers = temp.getTop3Players(); // Use your method to get top 3 players
+        for (Player player : topPlayers) {
+            String playerInfo = player.getName() + " - " + player.getMeilleurScore();
+            Label playerLabel = new Label(playerInfo, skin);
+            topRightTable.add(playerLabel).pad(5);
+            topRightTable.row();
+        }
 
         Label titleLabel = new Label("Settings Menu", skin);
         table.add(titleLabel).colspan(2).pad(10);
