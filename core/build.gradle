@@ -20,3 +20,16 @@ jar {
 }
 sourceSets.main.resources.srcDirs = [ "../assets" ]
 
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+eclipse.project.name = appName + '-core'
+
+task runGame(type: JavaExec) {
+  mainClass.set("io.github.lo3ba.entities.Main")
+  classpath = sourceSets.main.runtimeClasspath
+
+  if (org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
+    jvmArgs += "-XstartOnFirstThread"
+  }
+}
+
+sourceSets.main.resources.srcDirs = [ "../assets" ]

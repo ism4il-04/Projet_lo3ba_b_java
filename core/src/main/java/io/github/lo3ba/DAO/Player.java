@@ -110,4 +110,19 @@ public class Player {
     }
 
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Integer getMeilleurScore() {
+        return meilleurScore;
+    }
+
+    public void setMeilleurScore(String meilleurScore) {
+        this.meilleurScore = 0;
+    }
 }
