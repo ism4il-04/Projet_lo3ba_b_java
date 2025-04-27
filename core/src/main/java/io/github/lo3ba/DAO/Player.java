@@ -1,31 +1,113 @@
 package io.github.lo3ba.DAO;
 
+import com.badlogic.gdx.utils.Array;
+
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Player {
     public int id;
     public String name;
     public int meilleurScore;
+    public String niveau;
 
     public Player(){
     }
 
-    public void MajScore(int id, int score) {
+    public Player(int id, String name, int meilleurScore, String niveau) {
+        this.id = id;
+        this.name = name;
+        this.meilleurScore = meilleurScore;
+        this.niveau = niveau;
+    }
+
+    public Player(String name) {
+        this.name = name;
+    }
+
+    public void majScoreSiDepasse(String nom, int score) {
         try {
             Statement stm = ConnexionBD.seConnecter();
-            stm.executeUpdate("update Player set meilleurScore ="+score+" where id ="+id);
+
+            // Retrieve the current meilleurScore for the player
+            ResultSet rs = stm.executeQuery("SELECT meilleurScore FROM Player WHERE nom = '" + nom + "'");
+            if (rs.next()) {
+                int meilleurScore = rs.getInt("meilleurScore");
+
+                // Update the score only if the new score is higher
+                if (score > meilleurScore) {
+                    stm.executeUpdate("UPDATE Player SET meilleurScore = " + score + " WHERE nom = '" + nom + "'");
+                    System.out.println("Score mis à jour pour " + nom);
+                } else {
+                    System.out.println("Le nouveau score n'est pas supérieur au meilleur score actuel.");
+                }
+            } else {
+                System.out.println("Aucun joueur trouvé avec le nom : " + nom);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-    public void Ajouter(Player l){
+    public void Ajouter(String l){
         try {
             Statement stm = ConnexionBD.seConnecter();
-            stm.executeUpdate(("insert into Player values("+this.id+",'"
-                +this.name+"','"+this.meilleurScore+"')"));
+            stm.executeUpdate("insert into Player (nom,meilleurScore,niveau) values('"+l+"',0,'easy');");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+    public List<Player> getAllPlayers(){
+        List<Player> players = new ArrayList<Player>();
+        try {
+            Statement stm = ConnexionBD.seConnecter();
+            ResultSet rs=stm.executeQuery("SELECT * FROM player");
+            while(rs.next()){
+                int id1 = rs.getInt(1);
+                String name = rs.getString(2);
+                int meilleurScore = rs.getInt(3);
+                String niveau = rs.getString(4);
+                players.add(new Player(id1,name,meilleurScore,niveau));
+}
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return players;
+    }
+
+    public List<Player> getTop3Players() {
+        List<Player> players = new ArrayList<Player>();
+        try {
+            Statement stm = ConnexionBD.seConnecter();
+            ResultSet rs = stm.executeQuery("SELECT * FROM player ORDER BY meilleurScore DESC LIMIT 3");
+            while (rs.next()) {
+                int id1 = rs.getInt(1);
+                String name = rs.getString(2);
+                int meilleurScore = rs.getInt(3);
+                String niveau = rs.getString(4);
+                players.add(new Player(id1, name, meilleurScore, niveau));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return players;
+    }
+
+    public Array<String> getAllPlayersNames(){
+        Array<String> players = new Array<>();
+        try {
+            Statement stm = ConnexionBD.seConnecter();
+            ResultSet rs=stm.executeQuery("SELECT nom FROM player");
+            while(rs.next()){
+                players.add(rs.getString(1));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return players;
+    }
+
+
 }

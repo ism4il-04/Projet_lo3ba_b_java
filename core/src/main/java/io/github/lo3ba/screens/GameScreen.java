@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
+import io.github.lo3ba.DAO.Matche;
+import io.github.lo3ba.DAO.Player;
 import io.github.lo3ba.Main_Game;
 import io.github.lo3ba.entities.*;
 import java.util.Iterator;
@@ -43,6 +45,8 @@ public class GameScreen implements Screen {
     private final int healthIconSize = 30;
     private final int healthIconPadding = 5;
     private boolean isPaused = false;
+    private String difficulty;
+    private String playerName;
 
     public GameScreen(Main_Game game) {
         this.game = game;
@@ -53,26 +57,33 @@ public class GameScreen implements Screen {
         this.chatHistory = new StringBuilder();
         this.powerUps = new Array<>();
 
-        loadAssets();
+        //loadAssets();
         setupChat();
     }
 
-    public GameScreen(Main_Game game, String text, String selected, String selectedJet) {
+    public GameScreen(Main_Game game, String playername, String niveau, String selectedJet) {
         this.game = game;
-        Gdx.app.log("GameScreen", "GameScreen created");
-
         this.camera = new OrthographicCamera();
         this.camera.setToOrtho(false, 800, 600);
         this.font = new BitmapFont();
+        this.scoreFont = new BitmapFont();
         this.chatHistory = new StringBuilder();
-
-        loadAssets();
+        this.powerUps = new Array<>();
+        this.difficulty = niveau;
+        this.playerName = playername;
+        if (selectedJet.equals("jet1")){
+            loadAssets("tyaranadia2.png");
+        } else if (selectedJet.equals("jet2")){
+            loadAssets("jet2.png");
+        } else if (selectedJet.equals("jet3")){
+            loadAssets("jet3.png");
+        }
         setupChat();
     }
 
-    private void loadAssets() {
+    private void loadAssets(String j) {
         try {
-            jetTexture = new Texture(Gdx.files.internal("tyaranadia2.png"));
+            jetTexture = new Texture(Gdx.files.internal(j));
             backgroundTexture = new Texture(Gdx.files.internal("fontdecran.png"));
             enemyTexture = new Texture(Gdx.files.internal("tyaranadia.png"));
             enemyBulletTexture = new Texture(Gdx.files.internal("enemy_bullet.png"));
@@ -333,7 +344,11 @@ public class GameScreen implements Screen {
     private void handleGameOver(float delta) {
         gameOverTimer += delta;
         if (gameOverTimer >= gameOverDelay) {
-            game.setScreen(new GameScreen(game));
+            Matche matche = new Matche();
+            matche.AjouterMatche(playerName,playerScore,difficulty);
+            Player p=new Player();
+            p.majScoreSiDepasse(playerName,playerScore);
+            game.setScreen(new MenuScreen(game));
         }
 
         game.getBatch().begin();
