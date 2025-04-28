@@ -55,7 +55,7 @@ public class MenuScreen implements Screen {
         Player temp = new Player();
         List<Player> topPlayers = temp.getTop3Players(); // Use your method to get top 3 players
         for (Player player : topPlayers) {
-            String playerInfo = player.getName() + " - " + player.getMeilleurScore();
+            String playerInfo = player.getNom() + " - " + player.getMeilleurScore();
             Label playerLabel = new Label(playerInfo, skin);
             topRightTable.add(playerLabel).pad(5);
             topRightTable.row();

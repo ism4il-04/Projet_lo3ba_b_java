@@ -10,7 +10,7 @@ import java.util.List;
 
 public class Player {
     public int id;
-    public String name;
+    public String nom;
     public int meilleurScore;
     public String niveau;
 
@@ -19,13 +19,13 @@ public class Player {
 
     public Player(int id, String name, int meilleurScore, String niveau) {
         this.id = id;
-        this.name = name;
+        this.nom = name;
         this.meilleurScore = meilleurScore;
         this.niveau = niveau;
     }
 
     public Player(String name) {
-        this.name = name;
+        this.nom = name;
     }
 
     public void majScoreSiDepasse(String nom, int score) {
@@ -110,12 +110,12 @@ public class Player {
     }
 
 
-    public String getName() {
-        return name;
+    public String getNom() {
+        return nom;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setNom(String name) {
+        this.nom = name;
     }
 
     public Integer getMeilleurScore() {

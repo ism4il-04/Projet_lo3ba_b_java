@@ -7,9 +7,9 @@ import java.sql.Statement;
 
 public class ConnexionBD {
     private static Connection connexion = null;
-    private static final String URL = "jdbc:mysql://localhost:3306/jet_game?useSSL=false&serverTimezone=UTC";
-    private static final String USER = "jihane";
-    private static final String PASSWORD = "jihane123!";
+    static String URL = "jdbc:mysql://localhost:3306/jet_game";
+    static String user = "root";
+    static String PASSWORD = "root12345";
 
     public static Statement seConnecter() throws SQLException {
         try {
@@ -18,7 +18,7 @@ public class ConnexionBD {
 
             // 2. Établir la connexion si elle n'existe pas ou est fermée
             if (connexion == null || connexion.isClosed()) {
-                connexion = DriverManager.getConnection(URL, USER, PASSWORD);
+                connexion = DriverManager.getConnection(URL, user, PASSWORD);
             }
 
             // 3. Créer un espace d'exécution
@@ -42,7 +42,7 @@ public class ConnexionBD {
     // Méthode supplémentaire pour obtenir directement une Connection
     public static Connection getConnection() throws SQLException {
         if (connexion == null || connexion.isClosed()) {
-            connexion = DriverManager.getConnection(URL, USER, PASSWORD);
+            connexion = DriverManager.getConnection(URL, user, PASSWORD);
         }
         return connexion;
     }
