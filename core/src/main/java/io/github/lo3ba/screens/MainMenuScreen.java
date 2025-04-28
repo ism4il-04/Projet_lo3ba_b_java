@@ -19,7 +19,7 @@ public class MainMenuScreen implements Screen {
         this.stage = new Stage(new ScreenViewport()); //initialisé avec ScreenViewport pour gérer l’adaptation à la taille de l’écran.
         Gdx.input.setInputProcessor(stage);//dit à LibGDX que tous les événements d’entrée (clavier, souris, etc.) vont au stage
 
-        background = new Texture("menu_background.png");
+        background = new Texture("lor.jpeg");
 
         Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
 
@@ -45,8 +45,18 @@ public class MainMenuScreen implements Screen {
             }
         });
 
-        table.add(startButton).width(150).height(40).pad(20).row();
-        table.add(exitButton).width(150).height(80).pad(20);
+        table.add(); // Colonne vide
+        table.add(startButton)
+            .width(180).height(50)
+            .pad(15)
+            .fillX()
+            .uniformX()
+            .row();
+
+        table.add(); // Colonne vide
+        table.add(exitButton)
+            .width(180).height(50)
+            .pad(15);
 
 
         stage.addActor(table);
