@@ -7,9 +7,10 @@ import java.sql.Statement;
 
 public class ConnexionBD {
     private static Connection connexion = null;
-    static String URL = "jdbc:mysql://localhost:3306/jet_game";
+    // Dans ConnexionBD.java
+    static String URL = "jdbc:mysql://localhost:8889/jet_game"; // Port MySQL de MAMP
     static String user = "root";
-    static String PASSWORD = "root12345";
+    static String PASSWORD = "root"; // Mot de passe par défaut MAMP
 
     public static Statement seConnecter() throws SQLException {
         try {
