@@ -33,15 +33,21 @@ public class GameOverScreen implements Screen {
     private Label highScoreLabel;
     private BitmapFont bloodyFont;
     private BitmapFont regularFont;
+    private String difficulty;
+    private String playerName;
+    private String jetName;
 
     // Pour les particules de débris
     private Point[] debris;
     private Random random = new Random();
     private Color backgroundColor = new Color(0.1f, 0.1f, 0.1f, 1); // Gris foncé
 
-    public GameOverScreen(Main_Game game, int finalScore) {
+    public GameOverScreen(Main_Game game, int finalScore,String playerName, String difficulty ,String jetName) {
         this.game = game;
         this.finalScore = finalScore;
+        this.playerName = playerName;
+        this.difficulty = difficulty;
+        this.jetName = jetName;
 
         // Initialisation du stage
         stage = new Stage(new ScreenViewport());
@@ -92,7 +98,16 @@ public class GameOverScreen implements Screen {
         restartButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new GameScreen(game));
+                game.setScreen(new GameScreen(game,playerName,difficulty,jetName));
+            }
+        });
+
+        //bouton menu
+        TextButton menuButton = new TextButton("Menu", buttonStyle);
+        menuButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setScreen(new MenuScreen(game));
             }
         });
 
@@ -112,7 +127,9 @@ public class GameOverScreen implements Screen {
 
         Table buttonTable = new Table();
         buttonTable.add(restartButton).padRight(20);
+        buttonTable.add(menuButton).padRight(20);
         buttonTable.add(quitButton).padLeft(20);
+
 
         table.add(buttonTable);
         stage.addActor(table);

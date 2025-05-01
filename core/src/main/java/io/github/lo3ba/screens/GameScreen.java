@@ -47,6 +47,7 @@ public class GameScreen implements Screen {
     private boolean isPaused = false;
     private String difficulty;
     private String playerName;
+    private String sJetName;
 
     public GameScreen(Main_Game game) {
         this.game = game;
@@ -78,6 +79,7 @@ public class GameScreen implements Screen {
         } else if (selectedJet.equals("jet3")){
             loadAssets("jet3.png");
         }
+        this.sJetName = selectedJet;
         setupChat();
     }
 
@@ -348,7 +350,7 @@ public class GameScreen implements Screen {
             matche.AjouterMatche(playerName,playerScore,difficulty);
             Player p=new Player();
             p.majScoreSiDepasse(playerName,playerScore);
-            game.setScreen(new MenuScreen(game));
+            game.setScreen(new GameOverScreen(game,playerScore,playerName,difficulty,sJetName));
         }
 
         game.getBatch().begin();
