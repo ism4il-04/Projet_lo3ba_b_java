@@ -7,6 +7,7 @@ import io.github.lo3ba.network.ChatClient;
 import io.github.lo3ba.network.ChatServer;
 import io.github.lo3ba.screens.MainMenuScreen;
 import io.github.lo3ba.screens.MenuScreen;
+import io.github.lo3ba.screens.MultiplayerScreen;
 
 import java.io.IOException;
 
@@ -14,12 +15,14 @@ public class Main_Game extends Game {
     private SpriteBatch batch;
     private ChatClient chatClient;
     private ChatServer chatServer;
+    private MultiplayerScreen multiplayerScreen;
 
     @Override
     public void create() {
         batch = new SpriteBatch();
-        setScreen(new MainMenuScreen(this));
-        initializeNetwork();
+        //setScreen(new MainMenuScreen(this));
+        //initializeNetwork();
+        setScreen(new MultiplayerScreen(this));
     }
 
     private void initializeNetwork() {
