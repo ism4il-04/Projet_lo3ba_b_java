@@ -7,9 +7,8 @@ import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.utils.Select;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.lo3ba.DAO.Player;
 import io.github.lo3ba.Main_Game;
@@ -21,8 +20,10 @@ public class MenuScreen implements Screen {
     private Stage stage;
     private Skin skin;
     private Image jetPreview;
-    private String selectedJet = "Jet1";
+    private String selectedJet = "jet1";
     private final Texture jet1Texture, jet2Texture, jet3Texture;
+    private SelectBox<String> nameSelect;
+    private TextField nameField;
 
     public MenuScreen(Main_Game game) {
         this.game = game;
@@ -41,79 +42,110 @@ public class MenuScreen implements Screen {
         Table table = new Table();
         table.setFillParent(true);
         stage.addActor(table);
-        // Top-Right Table for Top 3 Players
+
+        // Top Players Table
+        createTopPlayersTable();
+
+        // Title
+        table.add(new Label("Settings Menu", skin)).colspan(2).pad(10);
+        table.row();
+
+        // Player Selection
+        createPlayerSelection(table);
+
+        // Difficulty and Jet Selection
+        createSettingsTable(table);
+
+        // Start Button
+        createStartButton(table);
+
+        // Exit Button
+        createExitButton(table);
+    }
+
+    private void createTopPlayersTable() {
         Table topRightTable = new Table();
-        topRightTable.setPosition(Gdx.graphics.getWidth() -75, Gdx.graphics.getHeight() -75); // Align to top-right corner
+        topRightTable.setPosition(Gdx.graphics.getWidth() - 75, Gdx.graphics.getHeight() - 75);
         stage.addActor(topRightTable);
 
-        // Label for Top 3 Players
         Label topPlayersLabel = new Label("Top 3 Players", skin);
         topRightTable.add(topPlayersLabel).pad(10);
         topRightTable.row();
 
-        // Fetch Top 3 Players
-        Player temp = new Player();
-        List<Player> topPlayers = temp.getTop3Players(); // Use your method to get top 3 players
-        for (Player player : topPlayers) {
-            String playerInfo = player.getName() + " - " + player.getMeilleurScore();
-            Label playerLabel = new Label(playerInfo, skin);
-            topRightTable.add(playerLabel).pad(5);
+        // Load top players
+        List<Player> topPlayers = new Player().getTop3Players();
+        if (topPlayers.isEmpty()) {
+            topRightTable.add(new Label("No players found", skin)).pad(5);
             topRightTable.row();
+        } else {
+            for (Player player : topPlayers) {
+                String playerInfo = player.getName() + " - " + player.getBestScore();
+                Label playerLabel = new Label(playerInfo, skin);
+                topRightTable.add(playerLabel).pad(5);
+                topRightTable.row();
+            }
         }
+    }
 
-        Label titleLabel = new Label("Settings Menu", skin);
-        table.add(titleLabel).colspan(2).pad(10);
-        table.row();
+    private void createPlayerSelection(Table table) {
+        // Existing Players Dropdown
+        nameSelect = new SelectBox<>(skin);
+        Array<String> playerNames = new Player().getAllPlayerNames();
+        nameSelect.setItems(playerNames);
 
-        // Player Name Input
-        Player temp = new Player();
-        final SelectBox<String> nameSelect = new SelectBox<>(skin);
-        nameSelect.setItems(temp.getAllPlayersNames());
         table.add(new Label("Select existing players:", skin)).pad(10);
         table.add(nameSelect).pad(10).width(200);
         table.row();
 
-        final TextField nameField = new TextField("", skin);
+        // New Player Input
+        nameField = new TextField("", skin);
         table.add(new Label("Enter new player:", skin)).pad(10);
         table.add(nameField).pad(10).width(200);
         table.row();
-        // Start Button
+
+        // Add Player Button
         TextButton addButton = new TextButton("Ajouter Joueur", skin);
         addButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                Player player=new Player();
-                player.Ajouter(nameField.getText());
-                game.setScreen(new MenuScreen(game));
+                String name = nameField.getText().trim();
+                if (!name.isEmpty()) {
+                    new Player().addPlayer(name);
+                    nameField.setText("");
+                    // Refresh player list
+                    nameSelect.setItems(new Player().getAllPlayerNames());
+                }
             }
         });
         table.add(addButton).colspan(2).pad(20).center();
         table.row();
+    }
 
-        Table settingsTable = new Table(); // C'est notre sous-table
+    private void createSettingsTable(Table table) {
+        Table settingsTable = new Table();
         table.add(settingsTable).colspan(2).pad(10);
         table.row();
 
-// Partie Gauche (difficulty, jet selection, preview)
+        // Left Table (Selections)
         Table leftTable = new Table();
 
-// Difficulty Selection
-        final SelectBox<String> difficultySelect = new SelectBox<>(skin);
+        // Difficulty Selection
+        SelectBox<String> difficultySelect = new SelectBox<>(skin);
         difficultySelect.setItems("easy", "normal", "hard");
         leftTable.add(new Label("Select Difficulty:", skin)).pad(10).left();
         leftTable.row();
         leftTable.add(difficultySelect).pad(10).width(200);
         leftTable.row();
 
-// Jet Selection
-        final SelectBox<String> jetSelect = new SelectBox<>(skin);
+        // Jet Selection
+        SelectBox<String> jetSelect = new SelectBox<>(skin);
         jetSelect.setItems("jet1", "jet2", "jet3");
         leftTable.add(new Label("Select Jet:", skin)).pad(10).left();
         leftTable.row();
         leftTable.add(jetSelect).pad(10).width(200);
         leftTable.row();
 
-// Jet Preview
+        // Jet Preview
         jetPreview = new Image(new TextureRegionDrawable(new TextureRegion(jet1Texture)));
         leftTable.add(jetPreview).pad(1).width(100).height(100);
         leftTable.row();
@@ -125,49 +157,56 @@ public class MenuScreen implements Screen {
             }
         });
 
-// Partie Droite (les sliders)
+        // Right Table (Sliders)
         Table rightTable = new Table();
+        createSliders(rightTable);
 
-// Sliders
+        settingsTable.add(leftTable).pad(10).top();
+        settingsTable.add(rightTable).pad(10).top();
+    }
+
+    private void createSliders(Table table) {
         Slider speedSlider = new Slider(1, 100, 1, false, skin);
         Slider attackSlider = new Slider(1, 100, 1, false, skin);
         Slider lifeSlider = new Slider(1, 100, 1, false, skin);
 
-        rightTable.add(new Label("Speed:", skin)).pad(10).left();
-        rightTable.row();
-        rightTable.add(speedSlider).pad(1).width(200);
-        rightTable.row();
+        table.add(new Label("Speed:", skin)).pad(10).left();
+        table.row();
+        table.add(speedSlider).pad(1).width(200);
+        table.row();
 
-        rightTable.add(new Label("Attack:", skin)).pad(10).left();
-        rightTable.row();
-        rightTable.add(attackSlider).pad(1).width(200);
-        rightTable.row();
+        table.add(new Label("Attack:", skin)).pad(10).left();
+        table.row();
+        table.add(attackSlider).pad(1).width(200);
+        table.row();
 
-        rightTable.add(new Label("Life:", skin)).pad(10).left();
-        rightTable.row();
-        rightTable.add(lifeSlider).pad(1).width(200);
-        rightTable.row();
+        table.add(new Label("Life:", skin)).pad(10).left();
+        table.row();
+        table.add(lifeSlider).pad(1).width(200);
+    }
 
-// Ajout des deux sous-tables dans la grande sous-table settingsTable
-        settingsTable.add(leftTable).pad(10).top();
-        settingsTable.add(rightTable).pad(10).top();
-        table.row(); // Pour continuer avec les boutons après
-// === FIN NOUVELLE SOUS-TABLE ===
-
-        // Start Button
+    private void createStartButton(Table table) {
         TextButton startButton = new TextButton("Start Game", skin);
         startButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                /*game.setScreen(new GameScreen(
-                    game));*/
-                game.setScreen(new GameScreen(game,nameSelect.getSelected(), difficultySelect.getSelected(), jetSelect.getSelected()));
+                String playerName = nameSelect.getSelected();
+                if (playerName == null || playerName.isEmpty()) {
+                    playerName = nameField.getText().trim();
+                    if (playerName.isEmpty()) {
+                        playerName = "Guest";
+                    }
+                }
+
+                String difficulty = "normal"; // Default if not using difficulty select
+                game.setScreen(new GameScreen(game, playerName, difficulty, selectedJet));
             }
         });
         table.add(startButton).colspan(2).center();
         table.row();
+    }
 
-        // Exit Button
+    private void createExitButton(Table table) {
         TextButton exitButton = new TextButton("Quit Game", skin);
         exitButton.addListener(new ClickListener() {
             @Override
@@ -213,19 +252,13 @@ public class MenuScreen implements Screen {
     }
 
     @Override
-    public void pause() {
-
-    }
+    public void pause() {}
 
     @Override
-    public void resume() {
-
-    }
+    public void resume() {}
 
     @Override
-    public void hide() {
-
-    }
+    public void hide() {}
 
     @Override
     public void dispose() {

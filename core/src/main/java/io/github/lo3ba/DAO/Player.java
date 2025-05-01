@@ -1,113 +1,122 @@
 package io.github.lo3ba.DAO;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Player {
-    public int id;
-    public String name;
-    public int meilleurScore;
-    public String niveau;
+    private int id;
+    private String name;
+    private Integer bestScore;
+    private String difficulty;
 
-    public Player(){
-    }
+    public Player() {}
 
-    public Player(int id, String name, int meilleurScore, String niveau) {
+    public Player(int id, String name, Integer bestScore, String difficulty) {
         this.id = id;
         this.name = name;
-        this.meilleurScore = meilleurScore;
-        this.niveau = niveau;
+        this.bestScore = bestScore;
+        this.difficulty = difficulty;
     }
 
-    public Player(String name) {
-        this.name = name;
-    }
+    // Getters
+    public int getId() { return id; }
+    public String getName() { return name; }
+    public Integer getBestScore() { return bestScore; }
+    public String getDifficulty() { return difficulty; }
 
-    public void majScoreSiDepasse(String nom, int score) {
+    public void updateScoreIfHigher(String playerName, int score) {
+        if (playerName == null) {
+            Gdx.app.error("Player", "Null player name");
+            return;
+        }
+
+        String sql = "UPDATE player SET meilleurScore = ? WHERE nom = ? AND (? > IFNULL(meilleurScore,0))";
+
         try {
-            Statement stm = ConnexionBD.seConnecter();
+            ConnexionBD.executeUpdate(sql, score, playerName, score);
+            Gdx.app.log("Player", "Score updated for " + playerName);
+        } catch (SQLException e) {
+            Gdx.app.error("Player", "Score update failed", e);
+        }
+    }
 
-            // Retrieve the current meilleurScore for the player
-            ResultSet rs = stm.executeQuery("SELECT meilleurScore FROM Player WHERE nom = '" + nom + "'");
-            if (rs.next()) {
-                int meilleurScore = rs.getInt("meilleurScore");
+    public void addPlayer(String playerName) {
+        if (playerName == null || playerName.trim().isEmpty()) {
+            Gdx.app.error("Player", "Invalid player name");
+            return;
+        }
 
-                // Update the score only if the new score is higher
-                if (score > meilleurScore) {
-                    stm.executeUpdate("UPDATE Player SET meilleurScore = " + score + " WHERE nom = '" + nom + "'");
-                    System.out.println("Score mis à jour pour " + nom);
-                } else {
-                    System.out.println("Le nouveau score n'est pas supérieur au meilleur score actuel.");
-                }
-            } else {
-                System.out.println("Aucun joueur trouvé avec le nom : " + nom);
+        String sql = "INSERT INTO player (nom) VALUES (?)";
+
+        try {
+            ConnexionBD.executeUpdate(sql, playerName.trim());
+            Gdx.app.log("Player", "Added player: " + playerName);
+        } catch (SQLException e) {
+            Gdx.app.error("Player", "Failed to add player", e);
+        }
+    }
+
+    public List<Player> getAllPlayers() {
+        List<Player> players = new ArrayList<>();
+        String sql = "SELECT id, nom, meilleurScore, niveau FROM player";
+
+        try (ResultSet rs = ConnexionBD.executeQuery(sql)) {
+            while (rs.next()) {
+                players.add(new Player(
+                    rs.getInt("id"),
+                    rs.getString("nom"),
+                    rs.getObject("meilleurScore", Integer.class), // Handles NULL
+                    rs.getString("niveau")
+                ));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    public void Ajouter(String l){
-        try {
-            Statement stm = ConnexionBD.seConnecter();
-            stm.executeUpdate("insert into Player (nom,meilleurScore,niveau) values('"+l+"',0,'easy');");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    public List<Player> getAllPlayers(){
-        List<Player> players = new ArrayList<Player>();
-        try {
-            Statement stm = ConnexionBD.seConnecter();
-            ResultSet rs=stm.executeQuery("SELECT * FROM player");
-            while(rs.next()){
-                int id1 = rs.getInt(1);
-                String name = rs.getString(2);
-                int meilleurScore = rs.getInt(3);
-                String niveau = rs.getString(4);
-                players.add(new Player(id1,name,meilleurScore,niveau));
-}
-        } catch (SQLException e) {
-            e.printStackTrace();
+            Gdx.app.error("Player", "Failed to load players", e);
+            // Fallback data
+            players.add(new Player(0, "Player1", 1000, "easy"));
+            players.add(new Player(0, "Player2", 800, "easy"));
         }
         return players;
     }
 
     public List<Player> getTop3Players() {
-        List<Player> players = new ArrayList<Player>();
-        try {
-            Statement stm = ConnexionBD.seConnecter();
-            ResultSet rs = stm.executeQuery("SELECT * FROM player ORDER BY meilleurScore DESC LIMIT 3");
+        List<Player> players = new ArrayList<>();
+        String sql = "SELECT id, nom, meilleurScore, niveau FROM player ORDER BY IFNULL(meilleurScore,0) DESC LIMIT 3";
+
+        try (ResultSet rs = ConnexionBD.executeQuery(sql)) {
             while (rs.next()) {
-                int id1 = rs.getInt(1);
-                String name = rs.getString(2);
-                int meilleurScore = rs.getInt(3);
-                String niveau = rs.getString(4);
-                players.add(new Player(id1, name, meilleurScore, niveau));
+                players.add(new Player(
+                    rs.getInt("id"),
+                    rs.getString("nom"),
+                    rs.getObject("meilleurScore", Integer.class),
+                    rs.getString("niveau")
+                ));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Gdx.app.error("Player", "Failed to load top players", e);
+            // Fallback data
+            players.add(new Player(0, "Top1", 5000, "hard"));
+            players.add(new Player(0, "Top2", 4000, "normal"));
+            players.add(new Player(0, "Top3", 3000, "easy"));
         }
         return players;
     }
 
-    public Array<String> getAllPlayersNames(){
-        Array<String> players = new Array<>();
-        try {
-            Statement stm = ConnexionBD.seConnecter();
-            ResultSet rs=stm.executeQuery("SELECT nom FROM player");
-            while(rs.next()){
-                players.add(rs.getString(1));
+    public Array<String> getAllPlayerNames() {
+        Array<String> names = new Array<>();
+        String sql = "SELECT nom FROM player";
+
+        try (ResultSet rs = ConnexionBD.executeQuery(sql)) {
+            while (rs.next()) {
+                String name = rs.getString("nom");
+                if (name != null) names.add(name);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Gdx.app.error("Player", "Failed to load names", e);
+            names.addAll("Player1", "Player2", "Player3");
         }
-        return players;
+        return names;
     }
-
-
 }
