@@ -1,5 +1,8 @@
 package io.github.lo3ba.multiplayer;
 
+import com.badlogic.gdx.Gdx;
+import io.github.lo3ba.screens.MultiplayerScreen;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
@@ -9,13 +12,21 @@ public class Client {
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
     private String username;
+    private MultiplayerScreen multiplayerScreen;
+
+    public String getUsername() {
+        return username;
+    }
 
     public Client(Socket socket, String username) {
         try {
+            System.out.println("creation de "+username);
             this.socket = socket;
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.username = username;
+            sendMessage(username);
+            listenForMessages();
         } catch (IOException e) {
             closeEverything(socket,bufferedReader,bufferedWriter);
         }
@@ -42,19 +53,27 @@ public class Client {
     }
 
     public void listenForMessages() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                String msgFromGroupChat;
-                while (socket.isConnected()) {
-                    try {
-                        msgFromGroupChat =  bufferedReader.readLine();
-                        System.out.println("From groupChat: "+msgFromGroupChat);
-                    } catch (IOException e) {
-                        closeEverything(socket,bufferedReader,bufferedWriter);
+        new Thread(() -> {
+            String msg;
+            while (socket.isConnected()) {
+                try {
+                    msg = bufferedReader.readLine();
+                    if (msg.startsWith("POS:")) {
+                        String[] parts = msg.substring(4).split(",");
+                        float x = Float.parseFloat(parts[0]);
+                        float y = Float.parseFloat(parts[1]);
+                        if (multiplayerScreen != null) {
+                            multiplayerScreen.updateEnemyPosition(x, y);
+                        }
                     }
-                }
+                    if (msg.equals("SHOOT")) {
+                        Gdx.app.postRunnable(() -> multiplayerScreen.enemyFire());
+                    }
 
+                } catch (IOException e) {
+                    closeEverything(socket, bufferedReader, bufferedWriter);
+                    break;
+                }
             }
         }).start();
     }
@@ -78,33 +97,30 @@ public class Client {
 
     public void sendMessage(String messageToSend) {
         try {
-            bufferedWriter.write(username);
+            bufferedWriter.write(messageToSend);
             bufferedWriter.newLine();
             bufferedWriter.flush();
-
-            while (socket.isConnected()) {
-                bufferedWriter.write(messageToSend);
-                bufferedWriter.newLine();
-                bufferedWriter.flush();
-
-            }
-        }
-        catch (IOException e) {
-            closeEverything(socket,bufferedReader,bufferedWriter);
+        } catch (IOException e) {
+            closeEverything(socket, bufferedReader, bufferedWriter);
         }
     }
 
-    public void sendPosition(float x, float y) {
-        sendMessage("POS:" + x + "," + y);
-    }
 
     public static void main(String[] args) throws IOException {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Entrez nom du client: ");
-        String username = scanner.nextLine();
+        //Scanner scanner = new Scanner(System.in);
+        //System.out.println("Entrez nom du client: ");
+        //String username = scanner.nextLine();
         Socket socket = new Socket("localhost", 1234);
-        Client client = new Client(socket,username);
+        Client client = new Client(socket,"ismail");
         client.listenForMessages();
         client.sendMessage();
+    }
+
+    public String getName() {
+        return username;
+    }
+
+    public void setMultiplayerScreen(MultiplayerScreen multiplayerScreen) {
+        this.multiplayerScreen = multiplayerScreen;
     }
 }

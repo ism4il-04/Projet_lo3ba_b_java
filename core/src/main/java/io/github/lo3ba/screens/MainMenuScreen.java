@@ -28,11 +28,20 @@ public class MainMenuScreen implements Screen {
         table.center();
 
         // Start button
-        TextButton startButton = new TextButton("Start", skin);
+        TextButton startButton = new TextButton("Start Soloplayer", skin);
         startButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 game.setScreen(new MenuScreen(game)); // Start game
+            }
+        });
+
+        //Multiplayer button
+        TextButton multiplayerButton = new TextButton("Start Multiplayer", skin);
+        multiplayerButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setScreen(new MultiPlayerMenuScreen(game)); // Start game
             }
         });
 
@@ -46,7 +55,8 @@ public class MainMenuScreen implements Screen {
         });
 
         table.add(startButton).width(150).height(40).pad(20).row();
-        table.add(exitButton).width(150).height(80).pad(20);
+        table.add(multiplayerButton).width(150).height(40).pad(20).row();
+        table.add(exitButton).width(150).height(40).pad(20);
 
 
         stage.addActor(table);

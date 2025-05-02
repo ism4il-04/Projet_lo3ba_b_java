@@ -19,6 +19,7 @@ public class ClientHandler implements Runnable {
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.clientUserName = bufferedReader.readLine();
             clientHandlers.add(this);
+            System.out.println("ahlan "+clientUserName);
             broadcastMessage("SERVER "+clientUserName + " has entered the chat");
         }catch (Exception e){
             closeEverything(socket, bufferedReader,bufferedWriter);
@@ -44,7 +45,7 @@ public class ClientHandler implements Runnable {
 
     public void removeClientHandler() {
         clientHandlers.remove(this);
-        broadcastMessage("SERVER"+clientUserName + "has left the chat");
+        broadcastMessage("SERVER "+clientUserName + " has left the chat");
     }
 
     private void broadcastMessage(String messageToSend) {
@@ -56,7 +57,7 @@ public class ClientHandler implements Runnable {
                     clientHandler.bufferedWriter.flush();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                closeEverything(socket, bufferedReader, bufferedWriter);
             }
         }
     }
@@ -64,12 +65,16 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
 
-        String messageFromClient;
+        String msgFromClient;
 
         while (socket.isConnected()) {
             try {
-                messageFromClient = bufferedReader.readLine();
-                broadcastMessage(messageFromClient);
+                msgFromClient = bufferedReader.readLine();
+                if (msgFromClient != null) {
+                    if (msgFromClient.startsWith("POS:") || msgFromClient.equals("SHOOT")) {
+                        broadcastMessage(msgFromClient); // Re-broadcast to others
+                    }
+                }
             } catch (IOException e) {
                 closeEverything(socket,bufferedReader,bufferedWriter);
                 break;

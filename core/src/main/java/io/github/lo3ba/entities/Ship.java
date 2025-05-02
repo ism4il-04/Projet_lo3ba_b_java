@@ -48,7 +48,7 @@ public class Ship {
 
         Laser[] lasers = new Laser[1];
 
-        lasers[0] = new Laser(10,xPosition + width/2 - laserWidth/2,yPosition + height,laserWidth,laserHeight,laserTexture);
+        lasers[0] = new Laser(10,xPosition + width/2 - laserWidth/2,yPosition + height,laserWidth,laserHeight,1,laserTexture);
 
         return lasers;
     }
@@ -65,11 +65,23 @@ public class Ship {
         this.yPosition = y;
     }
 
-    public String getX() {
-        return String.valueOf(xPosition);
+    public float getX() {
+        return xPosition;
     }
 
-    public String getY() {
-        return String.valueOf(yPosition);
+    public float getY() {
+        return yPosition;
+    }
+
+    public float getHeight() {
+        return height;
+    }
+
+    public void setY(float max) {
+        this.yPosition = max;
+    }
+
+    public void setX(float max) {
+        this.xPosition = max;
     }
 }

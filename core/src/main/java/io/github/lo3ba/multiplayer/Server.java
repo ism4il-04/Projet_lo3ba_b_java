@@ -15,6 +15,7 @@ public class Server {
      public void startServer() {
 
         try{
+            System.out.println("Server starting...");
             while (!serverSocket.isClosed()) {
                 Socket socket = serverSocket.accept();
                 System.out.println("A new client has connected");
@@ -24,7 +25,7 @@ public class Server {
                 thread.start();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            closeServerSocket();
         }
      }
 
@@ -39,9 +40,13 @@ public class Server {
      }
      public static void main(String[] args) throws IOException {
 
-        ServerSocket serverSocket = new ServerSocket(1234);
-        Server server = new Server(serverSocket);
-        server.startServer();
+         try {
+             ServerSocket serverSocket = new ServerSocket(1234);
+             Server server = new Server(serverSocket);
+             server.startServer();
+         } catch (IOException e) {
+             e.printStackTrace();
+         }
      }
 
 }
