@@ -48,6 +48,12 @@ public class GameScreen implements Screen {
     private String difficulty;
     private String playerName;
     private String sJetName;
+    private float speed;
+    private float fire;
+    private int maxEnemies;
+    private int enemiesSpawned;
+    private float enemyMoveSpeed;
+    private float enemyFireRate;
 
     public GameScreen(Main_Game game) {
         this.game = game;
@@ -72,13 +78,45 @@ public class GameScreen implements Screen {
         this.powerUps = new Array<>();
         this.difficulty = niveau;
         this.playerName = playername;
-        if (selectedJet.equals("jet1")){
+        switch (difficulty.toLowerCase()) {
+            case "easy":
+                maxEnemies = 15;
+                enemyMoveSpeed = 100f;  // 100 for easy (slower than current)
+                enemyFireRate = 2.5f;   // 2.5 for easy (slower than current)
+                break;
+            case "normal":
+                maxEnemies = 25;
+                enemyMoveSpeed = 125f;  // 125 for medium
+                enemyFireRate = 2.0f;   // 2.0 for medium
+                break;
+            case "hard":
+                maxEnemies = 45;
+                enemyMoveSpeed = 150f;  // 150 for hard (current values)
+                enemyFireRate = 1.5f;  // 1.5 for hard (current values)
+                break;
+            default:
+                maxEnemies = 15;
+                enemyMoveSpeed = 100f;
+                enemyFireRate = 2.5f;
+        }
+
+        enemiesSpawned = 0;
+        // Initialisation des stats en premier
+        if (selectedJet.equals("Basic Jet")) {
+            this.speed = 300f;  // Augmentez pour test
+            this.fire = 0.2f;
             loadAssets("tyaranadia2.png");
-        } else if (selectedJet.equals("jet2")){
+        } else if (selectedJet.equals("Advanced Jet")) {
+            this.speed = 350f;  // Augmentez pour test
+            this.fire = 0.15f;
             loadAssets("jet2.png");
-        } else if (selectedJet.equals("jet3")){
+        } else if (selectedJet.equals("Elite Jet")) {
+            this.speed = 400f;  // Augmentez pour test
+            this.fire = 0.1f;
             loadAssets("jet3.png");
         }
+
+        Gdx.app.log("GAME", "Selected jet: " + selectedJet + ", speed: " + speed + ", fire: " + fire);
         this.sJetName = selectedJet;
         setupChat();
     }
@@ -102,7 +140,7 @@ public class GameScreen implements Screen {
             scoreFont.getData().setScale(1.5f);
             scoreFont.setColor(Color.YELLOW);
 
-            jet = new Jet(jetTexture, playerBulletTexture);
+            jet = new Jet(jetTexture, playerBulletTexture, speed, fire);
             jet.getSprite().setPosition(
                 camera.viewportWidth/2 - jet.getSprite().getWidth()/2,
                 50
@@ -212,7 +250,7 @@ public class GameScreen implements Screen {
         healthIconTexture = new Texture(healthPixmap);
         healthPixmap.dispose();
 
-        jet = new Jet(jetTexture, playerBulletTexture);
+        jet = new Jet(jetTexture, playerBulletTexture, speed, fire);
         jet.getSprite().setPosition(
             camera.viewportWidth/2 - jet.getSprite().getWidth()/2,
             50
@@ -252,7 +290,11 @@ public class GameScreen implements Screen {
 
         game.getBatch().begin();
         game.getBatch().draw(backgroundTexture, 0, 0, camera.viewportWidth, camera.viewportHeight);
-
+        font.getData().setScale(1.2f);
+        font.setColor(Color.WHITE);
+        font.draw(game.getBatch(), "Player: " + playerName, 10, camera.viewportHeight - 30);
+        font.draw(game.getBatch(), "Level: " + difficulty, 10, camera.viewportHeight - 60);
+        font.getData().setScale(1.0f);
         jet.draw(game.getBatch());
         for (EnemyJet enemy : enemies) {
             enemy.render(game.getBatch());
@@ -302,9 +344,21 @@ public class GameScreen implements Screen {
             checkCollisions();
             updateExplosions(delta);
             checkGameOver();
+
+            if (isLevelComplete()) {
+                handleLevelComplete();
+            }
         }
     }
+    private void handleLevelComplete() {
+        // Add bonus points based on remaining health
+        playerScore += jet.getHealth() * 500;
 
+        // You could transition to a level complete screen here
+        // For now, we'll just show a message and end the game
+        gameOver = true;
+        gameOverTimer = gameOverDelay;
+    }
     public void spawnPowerUp(PowerUp.Type type, float x, float y) {
         Texture texture = null;
         switch (type) {
@@ -345,24 +399,51 @@ public class GameScreen implements Screen {
 
     private void handleGameOver(float delta) {
         gameOverTimer += delta;
-        if (gameOverTimer >= gameOverDelay) {
-            Matche matche = new Matche();
-            matche.AjouterMatche(playerName,playerScore,difficulty);
-            Player p=new Player();
-            p.majScoreSiDepasse(playerName,playerScore);
-            game.setScreen(new GameOverScreen(game,playerScore,playerName,difficulty,sJetName));
-        }
 
         game.getBatch().begin();
-        font.draw(game.getBatch(), "GAME OVER", camera.viewportWidth/2 - 50, camera.viewportHeight/2);
-        scoreFont.draw(game.getBatch(), "Score Final: " + playerScore, camera.viewportWidth/2 - 70, camera.viewportHeight/2 - 40);
+
+        // Show different messages based on win/lose condition
+        font.getData().setScale(2.0f);
+        if (jet.getHealth() > 0) {
+            // Player won
+            font.setColor(Color.GREEN);
+            font.draw(game.getBatch(), "YOU WON!",
+                camera.viewportWidth/2 - 70, camera.viewportHeight/2 + 50);
+        } else {
+            // Player lost
+            font.setColor(Color.RED);
+            font.draw(game.getBatch(), "YOU LOST!",
+                camera.viewportWidth/2 - 70, camera.viewportHeight/2 + 50);
+        }
+
+        // Show final score
+        font.setColor(Color.YELLOW);
+        font.draw(game.getBatch(), "Final Score: " + playerScore,
+            camera.viewportWidth/2 - 100, camera.viewportHeight/2);
+
+        // Show return message
+        font.getData().setScale(1.0f);
+        font.setColor(Color.WHITE);
+        font.draw(game.getBatch(), "Returning to menu...",
+            camera.viewportWidth/2 - 80, camera.viewportHeight/2 - 50);
+
         game.getBatch().end();
+
+        if (gameOverTimer >= gameOverDelay) {
+            Matche matche = new Matche();
+            matche.AjouterMatche(playerName, playerScore, difficulty);
+            Player p = new Player();
+            p.majScoreSiDepasse(playerName, playerScore);
+            game.setScreen(new GameOverScreen(game, playerScore, playerName, difficulty, sJetName));
+        }
     }
 
     private void updateEnemies(float delta) {
         enemySpawnTimer += delta;
-        if (enemySpawnTimer >= 1.5f) {
-            enemies.add(new EnemyJet(enemyTexture, enemyBulletTexture, jet,this));
+        if (enemySpawnTimer >= 1.5f && enemiesSpawned < maxEnemies) {
+            enemies.add(new EnemyJet(enemyTexture, enemyBulletTexture, jet, this,
+                enemyMoveSpeed, enemyFireRate));
+            enemiesSpawned++;
             enemySpawnTimer = 0;
         }
 
@@ -374,6 +455,11 @@ public class GameScreen implements Screen {
                 iterator.remove();
             }
         }
+    }
+
+    // Add a method to check if level is complete:
+    private boolean isLevelComplete() {
+        return enemiesSpawned >= maxEnemies && enemies.size == 0;
     }
 
     private void checkCollisions() {
@@ -423,7 +509,8 @@ public class GameScreen implements Screen {
     }
 
     private void checkGameOver() {
-        if (jet.getHealth() <= 0) {
+        // Game over if player dies OR all enemies are defeated
+        if (jet.getHealth() <= 0 || (enemiesSpawned >= maxEnemies && enemies.size == 0)) {
             gameOver = true;
         }
     }
@@ -502,6 +589,7 @@ public class GameScreen implements Screen {
         gameOver = false;
         gameOverTimer = 0;
         isPaused = false;
+        enemiesSpawned = 0;
     }
 
     @Override
