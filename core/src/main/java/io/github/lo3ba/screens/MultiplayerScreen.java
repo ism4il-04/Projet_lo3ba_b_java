@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -88,14 +89,6 @@ public class MultiplayerScreen extends InputAdapter implements Screen {
         enemyShip.setPosition(x, mirroredY);
     }
 
-
-    public void setEnemyHealth(int health) {
-        enemyShip.setHealth(health);
-        if (enemyShip.isDestroyed()) {
-            setGameResult("WON");
-        }
-    }
-
     public void setGameResult(String result) {
         this.gameOver = true;
         this.resultText = result.equals("WON") ? "YOU WON" : "YOU LOST";
@@ -146,6 +139,10 @@ public class MultiplayerScreen extends InputAdapter implements Screen {
                 i--;
                 enemyShip.takeDamage(1); // 🟥 Damage value
                 // Optional: send enemy health status?
+                if (enemyShip.getHealth()<=0){
+                    setGameResult("WON");
+                    this.gameOver = true;
+                }
             }
         }
 
@@ -156,6 +153,10 @@ public class MultiplayerScreen extends InputAdapter implements Screen {
                 enemyLasers.remove(i);
                 i--;
                 playerShip.takeDamage(1); // 🟥 Damage value
+                if (playerShip.getHealth()<=0){
+                    setGameResult("LOST");
+                    this.gameOver = true;
+                }
             }
         }
     }
@@ -211,10 +212,22 @@ public class MultiplayerScreen extends InputAdapter implements Screen {
             laser.draw(batch);
         }
 
-        int hearts = playerShip.getHealth();
-        for (int i = 0; i < hearts; i++) {
+        int playerHearts = playerShip.getHealth();
+        for (int i = 0; i < playerHearts; i++) {
             batch.draw(heartTexture, 10 + i * 40, 10, 32, 32); // Adjust position and size as needed
         }
+
+        int enemyHearts = enemyShip.getHealth();
+        for (int i = 0; i < enemyHearts; i++){
+            batch.draw(heartTexture, WORLD_WIDTH - 10 - i * 40, 10, 32, 32);
+        }
+
+        if (gameOver) {
+            BitmapFont font = new BitmapFont(); // Ideally, load this once in constructor
+            font.getData().setScale(3);
+            font.draw(batch, resultText, WORLD_WIDTH / 2f - 100, WORLD_HEIGHT / 2f);
+        }
+
 
 
         batch.end();
