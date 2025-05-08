@@ -3,6 +3,8 @@ package io.github.lo3ba.entities;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import jdk.jfr.DataAmount;
+
 
 public class Ship {
     private String shipName;
@@ -83,5 +85,9 @@ public class Ship {
 
     public void setX(float max) {
         this.xPosition = max;
+    }
+
+    public float getWidth() {
+        return width;
     }
 }

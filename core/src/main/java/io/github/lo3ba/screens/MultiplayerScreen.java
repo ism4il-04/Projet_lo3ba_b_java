@@ -103,18 +103,16 @@ public class MultiplayerScreen extends InputAdapter implements Screen {
 
             for (Laser laser : newLasers) {
                 playerLasers.add(laser);
+                client.sendMessage("SHOOT"); // 👈 send info to other player
             }
-            enemyFire();
 
-            client.sendMessage("SHOOT"); // 👈 send info to other player
 
         }
         float minY = 0;
-        float maxY = WORLD_HEIGHT / 2 - playerShip.getHeight(); // bottom half only
+        float maxY = (float) WORLD_HEIGHT / 2 - playerShip.getHeight(); // bottom half only
         playerShip.setY(Math.max(minY, Math.min(playerShip.getY(), maxY)));
         float minX = 0;
-        float maxX = WORLD_WIDTH;
-        playerShip.setX(Math.max(minX, Math.min(playerShip.getX(),maxX)));
+        playerShip.setX(Math.max(minX, Math.min(playerShip.getX(), (float) WORLD_WIDTH)));
 
     }
 
@@ -171,13 +169,7 @@ public class MultiplayerScreen extends InputAdapter implements Screen {
 
     public void enemyFire() {
         Gdx.app.log("DEBUG", "enemyFire called");
-        Laser[] newLasers = enemyShip.fireLasers();
-        for (Laser laser : newLasers) {
-            laser.setDirection(-1);
-            // Redescendre le laser pour qu’il parte *sous* le vaisseau ennemi
-            laser.setyPosition(enemyShip.getY() - laser.getHeight()) ;
-            enemyLasers.add(laser);
-        }
+        enemyLasers.add(new Laser(200,enemyShip.getX() + enemyShip.getWidth()/2 - 10/2,enemyShip.getY(),10,10,-1,enemyLaserTexture));
     }
 
 
