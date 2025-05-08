@@ -38,6 +38,8 @@ public class MultiplayerScreen extends InputAdapter implements Screen {
     private Texture enemyShipTexture;
     private Texture playerLaserTexture;
     private Texture enemyLaserTexture;
+    private Texture heartTexture;
+
 
     private final int WORLD_WIDTH = 800;
     private final int WORLD_HEIGHT = 600;
@@ -47,6 +49,10 @@ public class MultiplayerScreen extends InputAdapter implements Screen {
 
     private LinkedList<Laser> playerLasers;
     private LinkedList<Laser> enemyLasers;
+
+    private boolean gameOver = false;
+    private String resultText = ""; // "YOU WON" or "YOU LOST"
+
 
     public MultiplayerScreen(Main_Game main, Client client) {
         this.main = main;
@@ -63,9 +69,11 @@ public class MultiplayerScreen extends InputAdapter implements Screen {
 
         playerLaserTexture = new Texture(Gdx.files.internal("Shot_1.png"));
         enemyLaserTexture = new Texture(Gdx.files.internal("enemy_bullet.png"));
+        heartTexture = new Texture(Gdx.files.internal("health_icon.png"));
 
-        playerShip = new Ship("LASER05",5,WORLD_WIDTH/2,WORLD_HEIGHT/4,50,50,playerShipTexture,playerLaserTexture);
-        enemyShip = new Ship("LASER04",5,WORLD_WIDTH/2,WORLD_HEIGHT*3/4,50,50,enemyShipTexture,enemyLaserTexture);
+
+        playerShip = new Ship("LASER05",5,WORLD_WIDTH/2,WORLD_HEIGHT/4,5,playerShipTexture,playerLaserTexture);
+        enemyShip = new Ship("LASER04",5,WORLD_WIDTH/2,WORLD_HEIGHT*3/4,5,enemyShipTexture,enemyLaserTexture);
 
         playerLasers = new LinkedList<>();
         enemyLasers = new LinkedList<>();
@@ -78,6 +86,19 @@ public class MultiplayerScreen extends InputAdapter implements Screen {
     public void updateEnemyPosition(float x, float y) {
         float mirroredY = WORLD_HEIGHT - y - playerShip.getHeight(); // flip vertically
         enemyShip.setPosition(x, mirroredY);
+    }
+
+
+    public void setEnemyHealth(int health) {
+        enemyShip.setHealth(health);
+        if (enemyShip.isDestroyed()) {
+            setGameResult("WON");
+        }
+    }
+
+    public void setGameResult(String result) {
+        this.gameOver = true;
+        this.resultText = result.equals("WON") ? "YOU WON" : "YOU LOST";
     }
 
 
@@ -116,6 +137,30 @@ public class MultiplayerScreen extends InputAdapter implements Screen {
 
     }
 
+    private void checkCollisions() {
+        // Player lasers hit enemy
+        for (int i = 0; i < playerLasers.size(); i++) {
+            Laser laser = playerLasers.get(i);
+            if (laser.getBoundingRectangle().overlaps(enemyShip.getBoundingRectangle())) {
+                playerLasers.remove(i);
+                i--;
+                enemyShip.takeDamage(1); // 🟥 Damage value
+                // Optional: send enemy health status?
+            }
+        }
+
+        // Enemy lasers hit player
+        for (int i = 0; i < enemyLasers.size(); i++) {
+            Laser laser = enemyLasers.get(i);
+            if (laser.getBoundingRectangle().overlaps(playerShip.getBoundingRectangle())) {
+                enemyLasers.remove(i);
+                i--;
+                playerShip.takeDamage(1); // 🟥 Damage value
+            }
+        }
+    }
+
+
 
 
     @Override
@@ -150,6 +195,9 @@ public class MultiplayerScreen extends InputAdapter implements Screen {
             lastSentY = currentY;
         }
 
+        checkCollisions();
+
+
         batch.begin();
 
         batch.draw(background, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
@@ -162,6 +210,12 @@ public class MultiplayerScreen extends InputAdapter implements Screen {
         for (Laser laser : enemyLasers) {
             laser.draw(batch);
         }
+
+        int hearts = playerShip.getHealth();
+        for (int i = 0; i < hearts; i++) {
+            batch.draw(heartTexture, 10 + i * 40, 10, 32, 32); // Adjust position and size as needed
+        }
+
 
         batch.end();
 

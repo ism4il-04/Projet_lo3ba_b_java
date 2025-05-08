@@ -2,6 +2,7 @@ package io.github.lo3ba.entities;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.math.Rectangle;
 
 public class Laser  {
 
@@ -63,6 +64,10 @@ public class Laser  {
         this.direction = direction;
         this.laserTexture = laserTexture;
 
+    }
+
+    public Rectangle getBoundingRectangle() {
+        return new Rectangle(xPosition, yPosition, width, height);
     }
 
     public void update(float delta) {
