@@ -24,14 +24,14 @@ public class Main_Game extends Game {
     @Override
     public void create() {
         batch = new SpriteBatch();
-        //setScreen(new MainMenuScreen(this));
-        //initializeNetwork();
-        try {
+        setScreen(new MainMenuScreen(this));
+        initializeNetwork();
+        /*try {
             Socket socket = new Socket("localhost",1234);
             setScreen(new MultiplayerScreen(this,new Client(socket,"Player_" + (int)(Math.random()*1000))));
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
+        }*/
     }
 
     private void initializeNetwork() {

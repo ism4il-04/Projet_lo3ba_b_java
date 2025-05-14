@@ -16,7 +16,7 @@ public class ConnexionBD {
         try
         {
             //1 charger le driver
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             // établir la connexion avec la BDD
             connexion= DriverManager.getConnection(url,user, password);
             // créer un espace d'exécution des requêtes
