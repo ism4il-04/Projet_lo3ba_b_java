@@ -17,21 +17,23 @@ public class EnemyJet implements Disposable {
     private final List<DirectedBullet> bullets;
     private final Texture bulletTexture;
     private float fireCooldown = 0;
-    private final float fireRate = 1.5f;
-    private final float moveSpeed = 150f;
+    private float fireRate;
+    private  float moveSpeed;
     private float directionChangeTimer = 0;
     private float directionX = 1;
     private final Jet playerJet;
     private boolean isAlive = true;
     private final GameScreen gameScreen;
 
-    public EnemyJet(Texture texture, Texture bulletTexture, Jet playerJet, GameScreen gameScreen) {
+    public EnemyJet(Texture texture, Texture bulletTexture, Jet playerJet, GameScreen gameScreen,float moveSpeed, float fireRate) {
         this.sprite = new Sprite(texture);
         this.sprite.setSize(60, 60);
         this.bullets = new ArrayList<>();
         this.bulletTexture = bulletTexture;
         this.playerJet = playerJet;
         this.gameScreen= gameScreen;
+        this.moveSpeed = moveSpeed;
+        this.fireRate = fireRate;
 
         this.sprite.setPosition(
             MathUtils.random(0, Gdx.graphics.getWidth() - sprite.getWidth()),

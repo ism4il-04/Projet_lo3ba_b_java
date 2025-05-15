@@ -6,45 +6,31 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class ConnexionBD {
-    private static Connection connexion = null;
-    // Dans ConnexionBD.java
-    static String URL = "jdbc:mysql://localhost:8889/jet_game"; // Port MySQL de MAMP
-    static String user = "root";
-    static String PASSWORD = "root"; // Mot de passe par défaut MAMP
+    static Connection connexion=null;
+    static String url="jdbc:mysql://localhost:3306/jet_game";
+    static String user="root";
+    static String password ="";
 
-    public static Statement seConnecter() throws SQLException {
-        try {
-            // 1. Charger le driver (méthode moderne pour JDBC 4.0+)
-            Class.forName("com.mysql.cj.jdbc.Driver"); // Notez le "cj" pour MySQL Connector/J
-
-            // 2. Établir la connexion si elle n'existe pas ou est fermée
-            if (connexion == null || connexion.isClosed()) {
-                connexion = DriverManager.getConnection(URL, user, PASSWORD);
-            }
-
-            // 3. Créer un espace d'exécution
-            return connexion.createStatement();
-        } catch (ClassNotFoundException e) {
-            throw new SQLException("Driver MySQL non trouvé", e);
+    public static Statement seConnecter(){
+        Statement stm = null;
+        try
+        {
+            Class.forName("com.mysql.jdbc.Driver");
+            connexion= DriverManager.getConnection(url,user, password);
+            stm = connexion.createStatement();
         }
-    }
-
-    public static void seDeconnecter() {
-        try {
-            if (connexion != null && !connexion.isClosed()) {
-                connexion.close();
-            }
-        } catch (SQLException e) {
-            System.err.println("Erreur lors de la déconnexion : ");
+        catch (Exception e)
+        {
             e.printStackTrace();
         }
+        return stm;
     }
 
-    // Méthode supplémentaire pour obtenir directement une Connection
-    public static Connection getConnection() throws SQLException {
-        if (connexion == null || connexion.isClosed()) {
-            connexion = DriverManager.getConnection(URL, user, PASSWORD);
+    public static void seDeconnecter(){
+        try {
+            connexion.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        return connexion;
     }
 }

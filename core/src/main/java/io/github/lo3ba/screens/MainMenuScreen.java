@@ -19,7 +19,7 @@ public class MainMenuScreen implements Screen {
         this.stage = new Stage(new ScreenViewport()); //initialisé avec ScreenViewport pour gérer l’adaptation à la taille de l’écran.
         Gdx.input.setInputProcessor(stage);//dit à LibGDX que tous les événements d’entrée (clavier, souris, etc.) vont au stage
 
-        background = new Texture("lor.jpeg");
+        background = new Texture("menu_background.png");
 
         Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
 
@@ -28,11 +28,20 @@ public class MainMenuScreen implements Screen {
         table.center();
 
         // Start button
-        TextButton startButton = new TextButton("Start", skin);
+        TextButton startButton = new TextButton("Start Soloplayer", skin);
         startButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 game.setScreen(new MenuScreen(game)); // Start game
+            }
+        });
+
+        //Multiplayer button
+        TextButton multiplayerButton = new TextButton("Start Multiplayer", skin);
+        multiplayerButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setScreen(new MultiplayerLoaderScreen(game)); // Start game
             }
         });
 
@@ -45,18 +54,9 @@ public class MainMenuScreen implements Screen {
             }
         });
 
-        table.add(); // Colonne vide
-        table.add(startButton)
-            .width(180).height(50)
-            .pad(15)
-            .fillX()
-            .uniformX()
-            .row();
-
-        table.add(); // Colonne vide
-        table.add(exitButton)
-            .width(180).height(50)
-            .pad(15);
+        table.add(startButton).width(150).height(40).pad(20).row();
+        table.add(multiplayerButton).width(150).height(40).pad(20).row();
+        table.add(exitButton).width(150).height(40).pad(20);
 
 
         stage.addActor(table);

@@ -3,12 +3,18 @@ package io.github.lo3ba;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import io.github.lo3ba.multiplayer.Client;
+import io.github.lo3ba.multiplayer.Server;
 import io.github.lo3ba.network.ChatClient;
 import io.github.lo3ba.network.ChatServer;
 import io.github.lo3ba.screens.MainMenuScreen;
 import io.github.lo3ba.screens.MenuScreen;
+import io.github.lo3ba.screens.MultiPlayerMenuScreen;
+import io.github.lo3ba.screens.MultiplayerScreen;
 
 import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 public class Main_Game extends Game {
     private SpriteBatch batch;
@@ -19,7 +25,13 @@ public class Main_Game extends Game {
     public void create() {
         batch = new SpriteBatch();
         setScreen(new MainMenuScreen(this));
-        initializeNetwork();
+        //initializeNetwork();
+        /*try {
+            Socket socket = new Socket("localhost",1234);
+            setScreen(new MultiplayerScreen(this,new Client(socket,"Player_" + (int)(Math.random()*1000))));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }*/
     }
 
     private void initializeNetwork() {

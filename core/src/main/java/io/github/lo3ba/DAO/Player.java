@@ -10,7 +10,7 @@ import java.util.List;
 
 public class Player {
     public int id;
-    public String nom;
+    public String name;
     public int meilleurScore;
     public String niveau;
 
@@ -19,13 +19,13 @@ public class Player {
 
     public Player(int id, String name, int meilleurScore, String niveau) {
         this.id = id;
-        this.nom = name;
+        this.name = name;
         this.meilleurScore = meilleurScore;
         this.niveau = niveau;
     }
 
     public Player(String name) {
-        this.nom = name;
+        this.name = name;
     }
 
     public void majScoreSiDepasse(String nom, int score) {
@@ -110,19 +110,69 @@ public class Player {
     }
 
 
-    public String getNom() {
-        return nom;
+    public String getName() {
+        return name;
     }
-
-    public void setNom(String name) {
-        this.nom = name;
-    }
-
-    public Integer getMeilleurScore() {
+    public int getMeilleurScore() {
         return meilleurScore;
     }
+    public List<Jet> getAllJets() {
+        List<Jet> jets = new ArrayList<>();
+        try {
+            Statement stm = ConnexionBD.seConnecter();
+            ResultSet rs = stm.executeQuery("SELECT * FROM Jet");
+            while (rs.next()) {
+                jets.add(new Jet(
+                    rs.getInt("id"),
+                    rs.getString("name"),
+                    rs.getString("texture_path"),
+                    rs.getInt("speed"),
+                    rs.getInt("attack"),
+                    rs.getInt("unlock_score")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return jets;
+    }
 
-    public void setMeilleurScore(String meilleurScore) {
-        this.meilleurScore = 0;
+    public Jet getJetByName(String name) {
+        try {
+            Statement stm = ConnexionBD.seConnecter();
+            ResultSet rs = stm.executeQuery("SELECT * FROM Jet WHERE name = '" + name + "'");
+            if (rs.next()) {
+                return new Jet(
+                    rs.getInt("id"),
+                    rs.getString("name"),
+                    rs.getString("texture_path"),
+                    rs.getInt("speed"),
+                    rs.getInt("attack"),
+                    rs.getInt("unlock_score")
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Inner class for Jet (add this inside Player class)
+    public static class Jet {
+        public int id;
+        public String name;
+        public String texturePath;
+        public int speed;
+        public int attack;
+        public int unlockScore;
+
+        public Jet(int id, String name, String texturePath, int speed, int attack, int unlockScore) {
+            this.id = id;
+            this.name = name;
+            this.texturePath = texturePath;
+            this.speed = speed;
+            this.attack = attack;
+            this.unlockScore = unlockScore;
+        }
     }
 }
