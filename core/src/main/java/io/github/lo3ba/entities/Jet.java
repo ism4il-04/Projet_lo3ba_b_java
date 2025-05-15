@@ -12,8 +12,8 @@ public class Jet implements Disposable {
     private final Array<Bullet> bullets;
     private final Texture bulletTexture;
     private float fireCooldown = 0;
-    private final float moveSpeed = 300f;
-    private final float fireRate = 0.2f;
+    private  float moveSpeed;
+    private  float fireRate ;
     private final float screenWidth;
     private final float screenHeight;
     private boolean isShootingEnabled = true;
@@ -28,13 +28,15 @@ public class Jet implements Disposable {
     private PowerUp.Type activePowerUp = null;
     private int bulletCount = 1;
 
-    public Jet(Texture texture, Texture bulletTexture) {
+    public Jet(Texture texture, Texture bulletTexture, float moveSpeed, float fireRate) {
         this.sprite = new Sprite(texture);
         this.sprite.setSize(60, 60);
         this.bullets = new Array<>();
         this.bulletTexture = bulletTexture;
         this.screenWidth = Gdx.graphics.getWidth();
         this.screenHeight = Gdx.graphics.getHeight();
+        this.moveSpeed = moveSpeed;
+        this.fireRate = fireRate;
 
         setInitialPosition();
     }
@@ -113,10 +115,30 @@ public class Jet implements Disposable {
 
     private void handleMovement(float delta) {
         float velocity = moveSpeed * delta;
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) sprite.translateX(-velocity);
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) sprite.translateX(velocity);
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) sprite.translateY(velocity);
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) sprite.translateY(-velocity);
+
+        // Debug logs
+        boolean moving = false;
+
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            sprite.translateX(-velocity);
+            moving = true;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            sprite.translateX(velocity);
+            moving = true;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+            sprite.translateY(velocity);
+            moving = true;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+            sprite.translateY(-velocity);
+            moving = true;
+        }
+
+        if (moving) {
+            Gdx.app.log("JET", "Moving to x: " + sprite.getX() + ", y: " + sprite.getY());
+        }
 
         checkScreenBounds();
     }
@@ -203,6 +225,14 @@ public class Jet implements Disposable {
             bullet.dispose();
         }
         bullets.clear();
+    }
+
+    public void setMoveSpeed(float moveSpeed) {
+        this.moveSpeed = moveSpeed;
+    }
+
+    public void setFireRate(float fireRate) {
+        this.fireRate = fireRate;
     }
 
     public Sprite getSprite() { return sprite; }
