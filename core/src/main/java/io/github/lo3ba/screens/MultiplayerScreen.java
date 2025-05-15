@@ -117,7 +117,7 @@ public class MultiplayerScreen extends InputAdapter implements Screen {
 
             for (Laser laser : newLasers) {
                 playerLasers.add(laser);
-                client.sendMessage("SHOOT"); // 👈 send info to other player
+                client.sendMessage("SHOOT"); // send info to other player
             }
 
 
@@ -137,8 +137,7 @@ public class MultiplayerScreen extends InputAdapter implements Screen {
             if (laser.getBoundingRectangle().overlaps(enemyShip.getBoundingRectangle())) {
                 playerLasers.remove(i);
                 i--;
-                enemyShip.takeDamage(1); // 🟥 Damage value
-                // Optional: send enemy health status?
+                enemyShip.takeDamage(1); //  Damage value
                 if (enemyShip.getHealth()<=0){
                     setGameResult("WON");
                     this.gameOver = true;
@@ -152,7 +151,7 @@ public class MultiplayerScreen extends InputAdapter implements Screen {
             if (laser.getBoundingRectangle().overlaps(playerShip.getBoundingRectangle())) {
                 enemyLasers.remove(i);
                 i--;
-                playerShip.takeDamage(1); // 🟥 Damage value
+                playerShip.takeDamage(1); //  Damage value
                 if (playerShip.getHealth()<=0){
                     setGameResult("LOST");
                     this.gameOver = true;
@@ -191,7 +190,7 @@ public class MultiplayerScreen extends InputAdapter implements Screen {
         float currentY = playerShip.getY();
 
         if (currentX != lastSentX || currentY != lastSentY) {
-            client.sendMessage("POS:" + currentX + "," + currentY);
+            client.sendMessage("POS:" + currentX + "," + currentY); //envoie de message POS
             lastSentX = currentX;
             lastSentY = currentY;
         }

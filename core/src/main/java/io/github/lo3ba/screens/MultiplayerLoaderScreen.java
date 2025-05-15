@@ -71,11 +71,10 @@ public class MultiplayerLoaderScreen extends InputAdapter implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 try {
-                    Socket socket = new Socket(hostField.getText(), Integer.parseInt(portField.getText()));
-                    Client client = new Client(socket, playerName);
-                    game.setScreen(new MultiPlayerMenuScreen(game));
+                    Socket socket = new Socket(hostField.getText(),Integer.parseInt(hostField.getText()));
+                    game.setScreen(new MultiplayerScreen(game,new Client(socket,playerName )));
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    throw new RuntimeException(e);
                 }
             }
         });

@@ -25,7 +25,7 @@ public class Main_Game extends Game {
     public void create() {
         batch = new SpriteBatch();
         setScreen(new MainMenuScreen(this));
-        initializeNetwork();
+        //initializeNetwork();
         /*try {
             Socket socket = new Socket("localhost",1234);
             setScreen(new MultiplayerScreen(this,new Client(socket,"Player_" + (int)(Math.random()*1000))));
