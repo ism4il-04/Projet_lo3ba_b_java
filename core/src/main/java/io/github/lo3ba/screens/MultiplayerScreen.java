@@ -60,6 +60,7 @@ public class MultiplayerScreen extends InputAdapter implements Screen {
         this.camera = new OrthographicCamera();
         this.camera.setToOrtho(false, WORLD_WIDTH, WORLD_HEIGHT);
         this.client = client;
+        main = this.main;
         client.setMultiplayerScreen(this);
 
         System.out.println("loading assets");
@@ -92,6 +93,9 @@ public class MultiplayerScreen extends InputAdapter implements Screen {
     public void setGameResult(String result) {
         this.gameOver = true;
         this.resultText = result.equals("WON") ? "YOU WON" : "YOU LOST";
+        ; // ou socket.close() si tu l’as directement
+        main.setScreen(new GameOverMultiplayerScreen(main));
+
     }
 
 

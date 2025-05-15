@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import io.github.lo3ba.DAO.Player;
 import io.github.lo3ba.Main_Game;
 import io.github.lo3ba.multiplayer.Client;
 import io.github.lo3ba.multiplayer.ClientHandler;
@@ -24,18 +25,15 @@ public class MultiplayerLoaderScreen extends InputAdapter implements Screen {
     private Skin skin;
     private TextField hostField;
     private TextField portField;
-    private final String playerName;
-    private Server server;
 
     public enum Mode {
         HOST, JOIN
     }
 
-    public MultiplayerLoaderScreen(Main_Game game,String name) {
+    public MultiplayerLoaderScreen(Main_Game game) {
         this.game = game;
         this.stage = new Stage(new ScreenViewport());
         this.skin = new Skin(Gdx.files.internal("uiskin.json"));
-        this.playerName=name;
         setupUI();
         Gdx.input.setInputProcessor(stage);
     }
@@ -52,15 +50,30 @@ public class MultiplayerLoaderScreen extends InputAdapter implements Screen {
 
         TextButton hostButton = new TextButton("Host Game", skin);
         TextButton joinButton = new TextButton("Join Game", skin);
-
+        Player temp= new Player();
+        final SelectBox<String> nameSelect = new SelectBox<>(skin);
+        nameSelect.setItems(temp.getAllPlayersNames());
         hostButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 try {
-                    Socket socket = new Socket(hostField.getText(), Integer.parseInt(portField.getText()));
-                    Client client = new Client(socket, playerName);
-                    game.setScreen(new MultiplayerScreen(game,client));
-                } catch (IOException e) {
+                    int port = Integer.parseInt(portField.getText());
+
+                    // Lancer le serveur dynamiquement
+                    new Thread(() -> {
+                        try {
+                            new Server().start(port);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }).start();
+
+                    // Connexion du client
+                    Thread.sleep(300);
+                    Socket socket = new Socket(hostField.getText(), port);
+                    Client client = new Client(socket, nameSelect.getSelected() );
+                    game.setScreen(new MultiplayerScreen(game, client));
+                } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                 }
 
@@ -70,9 +83,10 @@ public class MultiplayerLoaderScreen extends InputAdapter implements Screen {
         joinButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                int port = Integer.parseInt(portField.getText());
                 try {
-                    Socket socket = new Socket(hostField.getText(),Integer.parseInt(hostField.getText()));
-                    game.setScreen(new MultiplayerScreen(game,new Client(socket,playerName )));
+                    Socket socket = new Socket(hostField.getText(), port);
+                    Client client = new Client(socket, nameSelect.getSelected() );                    game.setScreen(new MultiplayerScreen(game,new Client(socket,nameSelect.getSelected() )));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -80,6 +94,9 @@ public class MultiplayerLoaderScreen extends InputAdapter implements Screen {
         });
 
         table.add(title).padBottom(30).colspan(2).row();
+        table.add(new Label("Select existing players:", skin)).pad(10);
+        table.add(nameSelect).pad(10).width(200);
+        table.row();
         table.add(new Label("Host/IP:", skin)).left(); table.add(hostField).width(200).row();
         table.add(new Label("Port:", skin)).left(); table.add(portField).width(200).row();
         table.add(hostButton).padTop(30).colspan(2).width(200).height(50).row();

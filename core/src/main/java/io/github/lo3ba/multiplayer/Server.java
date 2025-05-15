@@ -11,6 +11,14 @@ public class Server {
         this.serverSocket = serverSocket;
 
     }
+    public Server(){
+    }
+
+    public void start(int port) throws IOException {
+        ServerSocket serverSocket = new ServerSocket(port);
+        Server server = new Server(serverSocket);
+        server.startServer();
+    }
 
      public void startServer() {
 
@@ -38,15 +46,12 @@ public class Server {
             e.printStackTrace();
         }
      }
-     public static void main(String[] args) throws IOException {
-
-         try {
-             ServerSocket serverSocket = new ServerSocket(1234);
-             Server server = new Server(serverSocket);
-             server.startServer();
-         } catch (IOException e) {
-             e.printStackTrace();
-         }
-     }
+    public static void main(String[] args) throws IOException {
+        int port = 1234;
+        if (args.length > 0) {
+            port = Integer.parseInt(args[0]);
+        }
+        new Server().start(port);
+    }
 
 }
